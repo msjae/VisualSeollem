@@ -32,9 +32,21 @@
 
 #include<thread>
 
+#include <easy/profiler.h>
+
 namespace ORB_SLAM2
 {
 
+/**
+ *
+ *  @brief Construct Initializer for a given reference frame
+ *
+ *  Use reference frame to initialize, this reference frame is the first frame
+ *  that SLAM officially starts
+ *  @param ReferenceFrame reference frame
+ *  @param sigma measurement error
+ *  @param iterations RANSAC iterations
+ */
 Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations)
 {
     mK = ReferenceFrame.mK.clone();
@@ -46,16 +58,30 @@ Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iteration
     mMaxIterations = iterations;
 }
 
-bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatches12, cv::Mat &R21, cv::Mat &t21,
-                             vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated)
+/**
+ * @brief calculates the fundamental matrix and the homography matrix in parallel,
+ *  selects one of the models, and restores the relative pose and point cloud between the
+ *  first two frames.
+ */
+bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatches12,
+                             cv::Mat &R21, cv::Mat &t21,vector<cv::Point3f> &vP3D,
+                             vector<bool> &vbTriangulated)
 {
+    EASY_BLOCK("Initalizer::Intialze()", profiler::colors::Cyan100);
     // Fill structures with current keypoints and matches with reference frame
     // Reference Frame: 1, Current Frame: 2
+
+    // Frame2 feature points
     mvKeys2 = CurrentFrame.mvKeysUn;
 
+    // mvMatches12 records matching feature points
     mvMatches12.clear();
     mvMatches12.reserve(mvKeys2.size());
+
+    // mvbMatched1 records whether each feature point has a matching feature point
     mvbMatched1.resize(mvKeys1.size());
+
+    // Step 1: Organize feature point pairs
     for(size_t i=0, iend=vMatches12.size();i<iend; i++)
     {
         if(vMatches12[i]>=0)
@@ -67,9 +93,12 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
             mvbMatched1[i]=false;
     }
 
+    // The number of matching feature points
     const int N = mvMatches12.size();
 
     // Indices for minimum set selection
+    // Create a new container vAllIndices, generate a number from 0 to N-1 as the index of the
+    // feature point
     vector<size_t> vAllIndices;
     vAllIndices.reserve(N);
     vector<size_t> vAvailableIndices;
@@ -80,6 +109,8 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
     }
 
     // Generate sets of 8 points for each RANSAC iteration
+    // Step 2: Randomly select 8 pairs of matching feature points from all
+    // matching feature point pairs as a group, and select the mMaxIterations group in total
     mvSets = vector< vector<size_t> >(mMaxIterations,vector<size_t>(8,0));
 
     DUtils::Random::SeedRandOnce(0);
@@ -91,21 +122,28 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
         // Select a minimum set
         for(size_t j=0; j<8; j++)
         {
+            // Generate random numbers from 0 to N-1
             int randi = DUtils::Random::RandomInt(0,vAvailableIndices.size()-1);
+            // idx indicates which feature point corresponding to the index is selected
             int idx = vAvailableIndices[randi];
 
             mvSets[it][j] = idx;
-
+            // The index corresponding to radi has been selected and deleted from the container
+            // insert the last element of vAvailableIndices to vAvailableIndices[randi]
             vAvailableIndices[randi] = vAvailableIndices.back();
+            // pop the last element since the last element is now in position randi
             vAvailableIndices.pop_back();
         }
     }
 
     // Launch threads to compute in parallel a fundamental matrix and a homography
+    // Step 3: Call multiple threads to calculate the fundamental matrix and homography
     vector<bool> vbMatchesInliersH, vbMatchesInliersF;
     float SH, SF;
     cv::Mat H, F;
 
+    // ref is the referenced function:
+    // calculate matrix and score
     thread threadH(&Initializer::FindHomography,this,ref(vbMatchesInliersH), ref(SH), ref(H));
     thread threadF(&Initializer::FindFundamental,this,ref(vbMatchesInliersF), ref(SF), ref(F));
 
@@ -114,9 +152,11 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
     threadF.join();
 
     // Compute ratio of scores
+    // Step 4: Calculate the score ratio and select a model
     float RH = SH/(SH+SF);
 
     // Try to reconstruct from homography or fundamental depending on the ratio (0.40-0.45)
+    // Step 5: Recover R,t from H matrix or F matrix
     if(RH>0.40)
         return ReconstructH(vbMatchesInliersH,H,mK,R21,t21,vP3D,vbTriangulated,1.0,50);
     else //if(pF_HF>0.6)
@@ -128,10 +168,13 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
 
 void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21)
 {
+    EASY_BLOCK("Initializer::FindHomography()", profiler::colors::Cyan100);
     // Number of putative matches
     const int N = mvMatches12.size();
 
     // Normalize coordinates
+    // Normalize mvKeys1 and mvKeys2 to mean 0,
+    // The first order absolute moment is 1, and the normalized matrix is T1, T2, repsectively
     vector<cv::Point2f> vPn1, vPn2;
     cv::Mat T1, T2;
     Normalize(mvKeys1,vPn1, T1);
@@ -139,6 +182,7 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
     cv::Mat T2inv = T2.inv();
 
     // Best Results variables
+    // The final best MathchesInliers and score
     score = 0.0;
     vbMatchesInliers = vector<bool>(N,false);
 
@@ -146,6 +190,7 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
     vector<cv::Point2f> vPn1i(8);
     vector<cv::Point2f> vPn2i(8);
     cv::Mat H21i, H12i;
+    // MatchesInliers and score of each RANSAC
     vector<bool> vbCurrentInliers(N,false);
     float currentScore;
 
@@ -156,15 +201,17 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
         for(size_t j=0; j<8; j++)
         {
             int idx = mvSets[it][j];
-
+            // vPn1i and vPn2i are the coordinates of the matched feature point pair
             vPn1i[j] = vPn1[mvMatches12[idx].first];
             vPn2i[j] = vPn2[mvMatches12[idx].second];
         }
 
         cv::Mat Hn = ComputeH21(vPn1i,vPn2i);
+        // restore the original mean and scale
         H21i = T2inv*Hn*T1;
         H12i = H21i.inv();
 
+        //Use the reprojection error to score the results of the current RANSAC
         currentScore = CheckHomography(H21i, H12i, vbCurrentInliers, mSigma);
 
         if(currentScore>score)
@@ -174,11 +221,18 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
             score = currentScore;
         }
     }
+    EASY_END_BLOCK;
 }
 
-
+/**
+ * @brief calculate the Fundamental matrix
+ *
+ * Assuming that the scene is non-planar, the Fundamental matrix(current frame 2 to reference frame1)
+ * is obtained through the first two frames, and the score of the model is obtained
+ */
 void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21)
 {
+    EASY_BLOCK("Initializer::FindFundamental()", profiler::colors::Cyan100);
     // Number of putative matches
     const int N = vbMatchesInliers.size();
 
@@ -225,11 +279,19 @@ void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, 
             score = currentScore;
         }
     }
+    EASY_END_BLOCK;
 }
 
-
+/**
+ * @brief Find homography (normalized DLT) from feature point matching
+ * @param vP1 normalized point, in reference frame
+ * @param vP2 normalized point, in current frame
+ * @return  homography
+ * Multiple View Geometry 4.2 p109
+ */
 cv::Mat Initializer::ComputeH21(const vector<cv::Point2f> &vP1, const vector<cv::Point2f> &vP2)
 {
+    EASY_BLOCK("Initializer::ComputeH21", profiler::colors::Cyan100);
     const int N = vP1.size();
 
     cv::Mat A(2*N,9,CV_32F);
@@ -266,12 +328,20 @@ cv::Mat Initializer::ComputeH21(const vector<cv::Point2f> &vP1, const vector<cv:
     cv::Mat u,w,vt;
 
     cv::SVDecomp(A,w,u,vt,cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
+    EASY_END_BLOCK;
 
     return vt.row(8).reshape(0, 3);
 }
-
+/**
+ * @brief Find the fundamental matrix from feature point matching (normalized 8 point method)
+ * @param vP1 normalized point, in reference frame
+ * @param vP2 normalized point, in current frame
+ * @return fundamental matrix
+ * Multiple View Geometry in Computer Vision-Algorithm 11.1 p282
+ */
 cv::Mat Initializer::ComputeF21(const vector<cv::Point2f> &vP1,const vector<cv::Point2f> &vP2)
 {
+    EASY_BLOCK("ComputeF21", profiler::colors::Cyan100);
     const int N = vP1.size();
 
     cv::Mat A(N,9,CV_32F);
@@ -303,12 +373,22 @@ cv::Mat Initializer::ComputeF21(const vector<cv::Point2f> &vP1,const vector<cv::
     cv::SVDecomp(Fpre,w,u,vt,cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
 
     w.at<float>(2)=0;
+    EASY_END_BLOCK;
 
     return  u*cv::Mat::diag(w)*vt;
 }
 
+/**
+ * @brief scores the given homography matrix
+ *
+ * @see
+ *-Author's paper-IV. AUTOMATIC MAP INITIALIZATION (2)
+ *-Multiple View Geometry in Computer Vision-symmetric transfer errors: 4.2.2 Geometric distance
+ *-Multiple View Geometry in Computer Vision-model selection 4.7.1 RANSAC
+ */
 float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, vector<bool> &vbMatchesInliers, float sigma)
-{   
+{
+    EASY_BLOCK("CheckHomography()", profiler::colors::Cyan100);
     const int N = mvMatches12.size();
 
     const float h11 = H21.at<float>(0,0);
@@ -388,12 +468,22 @@ float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, vecto
         else
             vbMatchesInliers[i]=false;
     }
+    EASY_END_BLOCK;
 
     return score;
 }
 
+/**
+ * @brief scores the given fundamental matrix
+ *
+ * @see
+ *-Author's paper-IV. AUTOMATIC MAP INITIALIZATION (2)
+ *-Multiple View Geometry in Computer Vision-symmetric transfer errors: 4.2.2 Geometric distance
+ *-Multiple View Geometry in Computer Vision-model selection 4.7.1 RANSAC
+ */
 float Initializer::CheckFundamental(const cv::Mat &F21, vector<bool> &vbMatchesInliers, float sigma)
 {
+    EASY_BLOCK("Initializer::CheckFundamental()", profiler::colors::Cyan100);
     const int N = mvMatches12.size();
 
     const float f11 = F21.at<float>(0,0);
@@ -468,13 +558,24 @@ float Initializer::CheckFundamental(const cv::Mat &F21, vector<bool> &vbMatchesI
         else
             vbMatchesInliers[i]=false;
     }
-
+    EASY_END_BLOCK;
     return score;
 }
 
+/**
+ * @brief restore R t from F
+ *
+ * Metric reconstruction
+ * 1. Combine the Fundamental matrix with the camera internal parameter K to get the Essential matrix:/f$ E = k'^TF k/f$
+ * 2. SVD decomposition to get R t
+ * 3. Perform a cheirality check to find the most suitable solution from the four solutions
+ *
+ * @see Multiple View Geometry in Computer Vision-Result 9.19 p259
+ */
 bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K,
                             cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    EASY_BLOCK("Initializer::ReconstructF", profiler::colors::Cyan100);
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -577,6 +678,7 @@ bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv:
 bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K,
                       cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    EASY_BLOCK("Initializer::ReconstructH", profiler::colors::Cyan100);
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -738,6 +840,7 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
 
 void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D)
 {
+    EASY_BLOCK("Initializer::Triangulate", profiler::colors::Cyan100);
     cv::Mat A(4,4,CV_32F);
 
     A.row(0) = kp1.pt.x*P1.row(2)-P1.row(0);
@@ -749,10 +852,12 @@ void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, 
     cv::SVD::compute(A,w,u,vt,cv::SVD::MODIFY_A| cv::SVD::FULL_UV);
     x3D = vt.row(3).t();
     x3D = x3D.rowRange(0,3)/x3D.at<float>(3);
+    EASY_END_BLOCK;
 }
 
 void Initializer::Normalize(const vector<cv::KeyPoint> &vKeys, vector<cv::Point2f> &vNormalizedPoints, cv::Mat &T)
 {
+    EASY_BLOCK("Initializer::Normalized", profiler::colors::Cyan100);
     float meanX = 0;
     float meanY = 0;
     const int N = vKeys.size();
@@ -797,6 +902,7 @@ void Initializer::Normalize(const vector<cv::KeyPoint> &vKeys, vector<cv::Point2
     T.at<float>(1,1) = sY;
     T.at<float>(0,2) = -meanX*sX;
     T.at<float>(1,2) = -meanY*sY;
+    EASY_END_BLOCK;
 }
 
 
@@ -804,6 +910,7 @@ int Initializer::CheckRT(const cv::Mat &R, const cv::Mat &t, const vector<cv::Ke
                        const vector<Match> &vMatches12, vector<bool> &vbMatchesInliers,
                        const cv::Mat &K, vector<cv::Point3f> &vP3D, float th2, vector<bool> &vbGood, float &parallax)
 {
+    EASY_BLOCK("Initializer::CheckRT", profiler::colors::Cyan100);
     // Calibration parameters
     const float fx = K.at<float>(0,0);
     const float fy = K.at<float>(1,1);
@@ -907,12 +1014,13 @@ int Initializer::CheckRT(const cv::Mat &R, const cv::Mat &t, const vector<cv::Ke
     }
     else
         parallax=0;
-
+    EASY_END_BLOCK;
     return nGood;
 }
 
 void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t)
 {
+    EASY_BLOCK("Initializer::DecomposeE", profiler::colors::Cyan100);
     cv::Mat u,w,vt;
     cv::SVD::compute(E,w,u,vt);
 
@@ -931,6 +1039,7 @@ void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat
     R2 = u*W.t()*vt;
     if(cv::determinant(R2)<0)
         R2=-R2;
+    EASY_END_BLOCK;
 }
 
 } //namespace ORB_SLAM

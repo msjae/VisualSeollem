@@ -33,6 +33,7 @@
 #include "Map.h"
 #include "MapPoint.h"
 
+#include <easy/profiler.h>
 #include<mutex>
 
 namespace ORB_SLAM2
@@ -70,6 +71,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB):
 
 void KeyFrame::ComputeBoW()
 {
+    EASY_BLOCK("KeyFrame::ComputeBow()", profiler::colors::Cyan500);
     if(mBowVec.empty() || mFeatVec.empty())
     {
         vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
@@ -77,6 +79,8 @@ void KeyFrame::ComputeBoW()
         // We assume the vocabulary tree has 6 levels, change the 4 otherwise
         mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
     }
+
+    EASY_END_BLOCK;
 }
 
 void KeyFrame::SetPose(const cv::Mat &Tcw_)
@@ -179,18 +183,19 @@ set<KeyFrame*> KeyFrame::GetConnectedKeyFrames()
 
 vector<KeyFrame*> KeyFrame::GetVectorCovisibleKeyFrames()
 {
+    EASY_BLOCK("KeyFrame::GetVectorCovisibleKeyFrames()", profiler::colors::Cyan500);
     unique_lock<mutex> lock(mMutexConnections);
     return mvpOrderedConnectedKeyFrames;
 }
 
 vector<KeyFrame*> KeyFrame::GetBestCovisibilityKeyFrames(const int &N)
 {
+    EASY_BLOCK("KeyFrame::GetBestCovisibilityKeyFrames()", profiler::colors::Cyan500);
     unique_lock<mutex> lock(mMutexConnections);
     if((int)mvpOrderedConnectedKeyFrames.size()<N)
         return mvpOrderedConnectedKeyFrames;
     else
         return vector<KeyFrame*>(mvpOrderedConnectedKeyFrames.begin(),mvpOrderedConnectedKeyFrames.begin()+N);
-
 }
 
 vector<KeyFrame*> KeyFrame::GetCovisiblesByWeight(const int &w)
@@ -300,6 +305,7 @@ MapPoint* KeyFrame::GetMapPoint(const size_t &idx)
 
 void KeyFrame::UpdateConnections()
 {
+    EASY_BLOCK("KeyFrame::UpdateConnections()", profiler::colors::Cyan500);
     map<KeyFrame*,int> KFcounter;
 
     vector<MapPoint*> vpMP;

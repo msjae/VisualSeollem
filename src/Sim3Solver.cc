@@ -28,6 +28,7 @@
 #include <cmath>
 #include <algorithm>
 #include <memory>
+#include <easy/profiler.h>
 
 #include "KeyFrame.h"
 #include "Thirdparty/DBoW2/DUtils/Random.h"
@@ -142,6 +143,7 @@ void Sim3Solver::SetRansacParameters(double probability, int minInliers, int max
 
 cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers)
 {
+    EASY_BLOCK("Sim3Solver::iterate()", profiler::colors::Amber500);
     bNoMore = false;
     vbInliers = vector<bool>(mN1,false);
     nInliers=0;

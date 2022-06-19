@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <easy/profiler.h>
 
 #include "Sim3Solver.h"
 #include "Converter.h"
@@ -68,10 +69,12 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 
 void LoopClosing::Run()
 {
+    EASY_BLOCK("LoopClosing::Run()", profiler::colors::Cyan900);
     mbFinished =false;
 
     while(1)
     {
+        EASY_BLOCK("LoopClsing::Run()_while")
         // Check if there are keyframes in the queue
         if(CheckNewKeyFrames())
         {
@@ -101,6 +104,7 @@ void LoopClosing::Run()
 
 void LoopClosing::InsertKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("LoopClosing::InsertKeyFrame", profiler::colors::Cyan900);
     unique_lock<mutex> lock(mMutexLoopQueue);
     if(pKF->mnId!=0)
         mlpLoopKeyFrameQueue.push_back(pKF);
@@ -114,6 +118,7 @@ bool LoopClosing::CheckNewKeyFrames()
 
 bool LoopClosing::DetectLoop()
 {
+    EASY_BLOCK("LoopClosing::DetectLoop()", profiler::colors::Cyan900);
     {
         unique_lock<mutex> lock(mMutexLoopQueue);
         mpCurrentKF = mlpLoopKeyFrameQueue.front();
@@ -242,6 +247,7 @@ bool LoopClosing::DetectLoop()
 
 bool LoopClosing::ComputeSim3()
 {
+    EASY_BLOCK("LoopClosing::ComputeSim3()", profiler::colors::Cyan900);
     // For each consistent loop candidate we try to compute a Sim3
 
     const int nInitialCandidates = mvpEnoughConsistentCandidates.size();
@@ -413,6 +419,7 @@ bool LoopClosing::ComputeSim3()
 
 void LoopClosing::CorrectLoop()
 {
+    EASY_BLOCK("LoopClosing::CorrectLoop()", profiler::colors::Cyan900);
     cout << "Loop detected!" << endl;
 
     // Send a stop signal to Local Mapping
@@ -598,6 +605,7 @@ void LoopClosing::CorrectLoop()
 
 void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
 {
+    EASY_BLOCK("LoopClosing::SearchAndFuse()", profiler::colors::Cyan900);
     ORBmatcher matcher(0.8);
 
     for(KeyFrameAndPose::const_iterator mit=CorrectedPosesMap.begin(), mend=CorrectedPosesMap.end(); mit!=mend;mit++)
@@ -656,6 +664,7 @@ void LoopClosing::ResetIfRequested()
 
 void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 {
+    EASY_BLOCK("LoopClosing::RunGlobalBundleAdjustment()", profiler::colors::Cyan900);
     cout << "Starting Global Bundle Adjustment" << endl;
 
     int idx =  mnFullBAIdx;

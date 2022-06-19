@@ -68,6 +68,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+#include <easy/profiler.h>
 
 
 using namespace cv;
@@ -546,7 +547,8 @@ void ExtractorNode::DivideNode(ExtractorNode &n1, ExtractorNode &n2, ExtractorNo
 vector<cv::KeyPoint> ORBextractor::DistributeOctTree(const vector<cv::KeyPoint>& vToDistributeKeys, const int &minX,
                                        const int &maxX, const int &minY, const int &maxY, const int &N, const int &level)
 {
-    // Compute how many initial nodes   
+    EASY_BLOCK("ORBextractor::DistributeOctTree()", profiler::colors::Amber200);
+    // Compute how many initial nodes
     const int nIni = round(static_cast<float>(maxX-minX)/(maxY-minY));
 
     const float hX = static_cast<float>(maxX-minX)/nIni;
@@ -1041,6 +1043,7 @@ void ORBextractor::ComputeKeyPointsOld(std::vector<std::vector<KeyPoint> > &allK
 static void computeDescriptors(const Mat& image, vector<KeyPoint>& keypoints, Mat& descriptors,
                                const vector<Point>& pattern)
 {
+    EASY_BLOCK("computeDescriptors", profiler::colors::Amber200);
     descriptors = Mat::zeros((int)keypoints.size(), 32, CV_8UC1);
 
     for (size_t i = 0; i < keypoints.size(); i++)
@@ -1049,7 +1052,8 @@ static void computeDescriptors(const Mat& image, vector<KeyPoint>& keypoints, Ma
 
 void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPoint>& _keypoints,
                       OutputArray _descriptors)
-{ 
+{
+    EASY_BLOCK("ORBextractor::operator()", profiler::colors::Amber200);
     if(_image.empty())
         return;
 
@@ -1113,6 +1117,7 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
 
 void ORBextractor::ComputePyramid(cv::Mat image)
 {
+    EASY_BLOCK("ORBextractor::ComputePyramid()", profiler::colors::Amber200);
     for (int level = 0; level < nlevels; ++level)
     {
         float scale = mvInvScaleFactor[level];
@@ -1135,7 +1140,6 @@ void ORBextractor::ComputePyramid(cv::Mat image)
                            BORDER_REFLECT_101);            
         }
     }
-
 }
 
 } //namespace ORB_SLAM

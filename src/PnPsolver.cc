@@ -55,6 +55,7 @@
 #include <cmath>
 #include <algorithm>
 #include <memory>
+#include <easy/profiler.h>
 
 #include "Thirdparty/DBoW2/DUtils/Random.h"
 #include "Frame.h"
@@ -166,6 +167,7 @@ cv::Mat PnPsolver::find(vector<bool> &vbInliers, int &nInliers)
 
 cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers)
 {
+    EASY_BLOCK("PnPSolver::iterate()", profiler::colors::Amber400);
     bNoMore = false;
     vbInliers.clear();
     nInliers=0;

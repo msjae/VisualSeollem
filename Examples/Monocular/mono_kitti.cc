@@ -29,6 +29,8 @@
 #include<opencv2/core/core.hpp>
 #include<opencv2/imgcodecs/legacy/constants_c.h>
 
+#include <easy/profiler.h>
+
 #include"System.h"
 
 using namespace std;
@@ -38,6 +40,9 @@ void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv)
 {
+
+    EASY_PROFILER_ENABLE;
+    EASY_BLOCK("main()_mono_kitti", profiler::colors::Magenta);
     if(argc != 4)
     {
         cerr << endl << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
@@ -47,11 +52,13 @@ int main(int argc, char **argv)
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
+    // argv[3] : image path
     LoadImages(string(argv[3]), vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    // argv[1] : vocabulary, argv[2] : settings(yaml)
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
@@ -121,7 +128,13 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");    
+    //SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+    SLAM.SaveKeyFrameTrajectoryKITTI("KeyFrameTrajectory_KITTI.txt");
+
+    EASY_END_BLOCK;
+
+    // Save profiler as a file
+    profiler::dumpBlocksToFile("ORB_SLAM2.prof");
 
     return 0;
 }

@@ -30,6 +30,8 @@
 #include <memory>
 #include <utility>
 
+#include <easy/profiler.h>
+
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include "MapPoint.h"
@@ -241,6 +243,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
 
 void Frame::AssignFeaturesToGrid()
 {
+    EASY_BLOCK("Frame::AssignFeatureToGrid()", profiler::colors::Amber100);
     int nReserve = 0.5f*N/(FRAME_GRID_COLS*FRAME_GRID_ROWS);
     for(unsigned int i=0; i<FRAME_GRID_COLS;i++)
         for (unsigned int j=0; j<FRAME_GRID_ROWS;j++)
@@ -258,6 +261,7 @@ void Frame::AssignFeaturesToGrid()
 
 void Frame::ExtractORB(int flag, const cv::Mat &im)
 {
+    EASY_BLOCK("Frame::ExtractORB", profiler::colors::Amber100);
     if(flag==0)
         (*mpORBextractorLeft)(im,cv::Mat(),mvKeys,mDescriptors);
     else
@@ -266,12 +270,14 @@ void Frame::ExtractORB(int flag, const cv::Mat &im)
 
 void Frame::SetPose(cv::Mat Tcw)
 {
+    EASY_BLOCK("Frame::SetPose()", profiler::colors::Amber100);
     mTcw = Tcw.clone();
     UpdatePoseMatrices();
 }
 
 void Frame::UpdatePoseMatrices()
-{ 
+{
+    EASY_BLOCK("Frame::UpdatePoseMatrices()", profiler::colors::Amber100);
     mRcw = mTcw.rowRange(0,3).colRange(0,3);
     mRwc = mRcw.t();
     mtcw = mTcw.rowRange(0,3).col(3);
@@ -280,6 +286,7 @@ void Frame::UpdatePoseMatrices()
 
 bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit)
 {
+    EASY_BLOCK("Frame::isInFrustum()", profiler::colors::Amber100);
     pMP->mbTrackInView = false;
 
     // 3D in absolute coordinates
@@ -338,6 +345,7 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit)
 
 vector<size_t> Frame::GetFeaturesInArea(const float &x, const float  &y, const float  &r, const int minLevel, const int maxLevel) const
 {
+    EASY_BLOCK("Frame::GetFeaturesInArea()", profiler::colors::Amber100);
     vector<size_t> vIndices;
     vIndices.reserve(N);
 
@@ -393,6 +401,7 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float  &y, const f
 
 bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY)
 {
+    EASY_BLOCK("Frame::PoseInGrid()", profiler::colors::Amber100);
     posX = round((kp.pt.x-mnMinX)*mfGridElementWidthInv);
     posY = round((kp.pt.y-mnMinY)*mfGridElementHeightInv);
 
@@ -406,15 +415,18 @@ bool Frame::PosInGrid(const cv::KeyPoint &kp, int &posX, int &posY)
 
 void Frame::ComputeBoW()
 {
+    EASY_BLOCK("Frame::ComputeBoW()", profiler::colors::Amber100);
     if(mBowVec.empty())
     {
         vector<cv::Mat> vCurrentDesc = Converter::toDescriptorVector(mDescriptors);
         mpORBvocabulary->transform(vCurrentDesc,mBowVec,mFeatVec,4);
     }
+    EASY_END_BLOCK;
 }
 
 void Frame::UndistortKeyPoints()
 {
+    EASY_BLOCK("Frame::UndistortKeyPoints()", profiler::colors::Amber100);
     if(mDistCoef.at<float>(0)==0.0)
     {
         mvKeysUn=mvKeys;
