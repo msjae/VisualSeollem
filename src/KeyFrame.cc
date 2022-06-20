@@ -265,7 +265,6 @@ namespace ORB_SLAM2
     set<MapPoint *> KeyFrame::GetMapPoints()
     {
         EASY_BLOCK("KeyFrame::GetMapPoints()", profiler::colors::Cyan500);
-        mvpMapPoints[idx] = pMP;
         unique_lock<mutex> lock(mMutexFeatures);
         set<MapPoint *> s;
         for (size_t i = 0, iend = mvpMapPoints.size(); i < iend; i++)
@@ -310,7 +309,6 @@ namespace ORB_SLAM2
     vector<MapPoint *> KeyFrame::GetMapPointMatches()
     {
         EASY_BLOCK("KeyFrame::GetMapPointMatches()", profiler::colors::Cyan500);
-        unique_lock<mutex> lock(mMutexFeatures);
         unique_lock<mutex> lock(mMutexFeatures);
         return mvpMapPoints;
     }
@@ -424,7 +422,6 @@ namespace ORB_SLAM2
     void KeyFrame::EraseChild(KeyFrame *pKF)
     {
         EASY_BLOCK("KeyFrame::EraseChild()", profiler::colors::Cyan500);
-        unique_lock<mutex> lockCon(mMutexConnections);
         unique_lock<mutex> lockCon(mMutexConnections);
         mspChildrens.erase(pKF);
     }

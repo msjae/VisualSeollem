@@ -74,8 +74,6 @@
 using namespace cv;
 using namespace std;
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 

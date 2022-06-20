@@ -34,7 +34,6 @@
 #include "Thirdparty/DBoW2/DUtils/Random.h"
 #include "MapPoint.h"
 
-EASY_PROFILER_ENABLE;
 
 namespace ORB_SLAM2
 {

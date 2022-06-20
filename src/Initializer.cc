@@ -34,8 +34,6 @@
 
 #include <easy/profiler.h>
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 

@@ -31,8 +31,6 @@
 
 #include<mutex>
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 

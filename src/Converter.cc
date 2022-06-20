@@ -25,8 +25,6 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 
@@ -75,14 +73,14 @@ cv::Mat Converter::toCvMat(const Eigen::Matrix<double,4,4> &m)
 {
     EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     cv::Mat cvMat(4,4,CV_32F);
-    for(int i=0;i<4;i++)x   
+    for(int i=0;i<4;i++)
         for(int j=0; j<4; j++)
             cvMat.at<float>(i,j)=m(i,j);
 
     return cvMat.clone();
 }
-const Eigen::Matrix3d &m
-cv::Mat Converter::toCvMat()
+
+cv::Mat Converter::toCvMat(const Eigen::Matrix3d &m)
 {
     EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     cv::Mat cvMat(3,3,CV_32F);

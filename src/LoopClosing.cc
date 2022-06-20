@@ -44,8 +44,6 @@ namespace DBoW2 { class BowVector; }
 #include<mutex>
 #include<thread>
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 

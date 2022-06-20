@@ -37,8 +37,6 @@
 #include "MapPoint.h"
 #include "ORBextractor.h"
 
-EASY_PROFILER_ENABLE;
-
 namespace ORB_SLAM2
 {
 
