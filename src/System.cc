@@ -32,6 +32,7 @@
 #include <list>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <easy/profiler.h>
 
 #include "Converter.h"
 #include "Frame.h"
@@ -53,6 +54,7 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
                const bool bUseViewer):mSensor(sensor), mpViewer(static_cast<Viewer*>(NULL)), mbReset(false),mbActivateLocalizationMode(false),
         mbDeactivateLocalizationMode(false)
 {
+    EASY_BLOCK("System::System()", profiler::colors::Black);
     // Output welcome message
     cout << endl <<
     "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza." << endl <<
@@ -135,6 +137,8 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 
 cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp)
 {
+
+    EASY_BLOCK("System::TrackStereo()", profiler::colors::Black);
     if(mSensor!=STEREO)
     {
         cerr << "ERROR: you called TrackStereo but input sensor was not set to STEREO." << endl;
@@ -184,8 +188,10 @@ cv::Mat System::TrackStereo(const cv::Mat &imLeft, const cv::Mat &imRight, const
     return Tcw;
 }
 
+
 cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const double &timestamp)
 {
+    EASY_BLOCK("System::TrackRGBD()", profiler::colors::Black);
     if(mSensor!=RGBD)
     {
         cerr << "ERROR: you called TrackRGBD but input sensor was not set to RGBD." << endl;
@@ -235,8 +241,10 @@ cv::Mat System::TrackRGBD(const cv::Mat &im, const cv::Mat &depthmap, const doub
     return Tcw;
 }
 
+
 cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
 {
+    EASY_BLOCK("System::TrackMonocular()", profiler::colors::Black);
     if(mSensor!=MONOCULAR)
     {
         cerr << "ERROR: you called TrackMonocular but input sensor was not set to Monocular." << endl;
@@ -287,20 +295,23 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
     return Tcw;
 }
 
+
 void System::ActivateLocalizationMode()
 {
+    EASY_BLOCK("System::ActivateLocalizationMode()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexMode);
     mbActivateLocalizationMode = true;
 }
 
 void System::DeactivateLocalizationMode()
 {
+    EASY_BLOCK("System::DeactivateLocalizationMode()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexMode);
     mbDeactivateLocalizationMode = true;
 }
-
 bool System::MapChanged()
 {
+    EASY_BLOCK("System::MapChanged()", profiler::colors::Black);
     static int n=0;
     int curn = mpMap->GetLastBigChangeIdx();
     if(n<curn)
@@ -312,14 +323,18 @@ bool System::MapChanged()
         return false;
 }
 
+
 void System::Reset()
 {
+    EASY_BLOCK("System::Reset()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexReset);
     mbReset = true;
 }
 
+
 void System::Shutdown()
 {
+    EASY_BLOCK("System::Shutdown()", profiler::colors::Black);
     mpLocalMapper->RequestFinish();
     mpLoopCloser->RequestFinish();
     if(mpViewer)
@@ -339,8 +354,10 @@ void System::Shutdown()
         pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 }
 
+
 void System::SaveTrajectoryTUM(const string &filename)
 {
+    EASY_BLOCK("System::SaveTrajectoryTUM()", profiler::colors::Black);
     cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
     if(mSensor==MONOCULAR)
     {
@@ -394,8 +411,10 @@ void System::SaveTrajectoryTUM(const string &filename)
 }
 
 
+
 void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 {
+    EASY_BLOCK("System::SaveKeyFrameTrajectoryTUM()", profiler::colors::Black);
     cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
 
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
@@ -430,8 +449,10 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     cout << endl << "trajectory saved!" << endl;
 }
 
+
 void System::SaveKeyFrameTrajectoryKITTI(const string &filename)
 {
+    EASY_BLOCK("System::SaveKeyFrameTrajectoryKITTI()", profiler::colors::Black);
     cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
 
     vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
@@ -472,8 +493,10 @@ void System::SaveKeyFrameTrajectoryKITTI(const string &filename)
     cout << endl << "trajectory saved!" << endl;
 }
 
+
 void System::SaveTrajectoryKITTI(const string &filename)
 {
+    EASY_BLOCK("System::SaveTrajectoryKITTI()", profiler::colors::Black);
     cout << endl << "Saving camera trajectory to " << filename << " ..." << endl;
     if(mSensor==MONOCULAR)
     {
@@ -524,22 +547,29 @@ void System::SaveTrajectoryKITTI(const string &filename)
     cout << endl << "trajectory saved!" << endl;
 }
 
+
 int System::GetTrackingState()
 {
+    EASY_BLOCK("System::GetTrackingState()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexState);
     return mTrackingState;
 }
 
+
 vector<MapPoint*> System::GetTrackedMapPoints()
 {
+    EASY_BLOCK("System::GetTrackedMapPoints()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexState);
     return mTrackedMapPoints;
 }
 
+
 vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 {
+    EASY_BLOCK("System::GetTrackedKeyPointsUn()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
 }
+
 
 } //namespace ORB_SLAM

@@ -26,6 +26,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <mutex>
+#include <easy/profiler.h>
 
 #include "FrameDrawer.h"
 #include "MapDrawer.h"
@@ -34,10 +35,12 @@
 namespace ORB_SLAM2
 {
 
+
 Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer, Tracking *pTracking, const string &strSettingPath):
     mpSystem(pSystem), mpFrameDrawer(pFrameDrawer),mpMapDrawer(pMapDrawer), mpTracker(pTracking),
     mbFinishRequested(false), mbFinished(true), mbStopped(true), mbStopRequested(false)
 {
+    EASY_BLOCK("Viewer::Viewer()", profiler::colors::Black);
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
     float fps = fSettings["Camera.fps"];
@@ -61,6 +64,7 @@ Viewer::Viewer(System* pSystem, FrameDrawer *pFrameDrawer, MapDrawer *pMapDrawer
 
 void Viewer::Run()
 {
+    EASY_BLOCK("Viewer::Run()", profiler::colors::Black);
     mbFinished = false;
     mbStopped = false;
 
@@ -178,30 +182,35 @@ void Viewer::Run()
 
 void Viewer::RequestFinish()
 {
+    EASY_BLOCK("Viewer::RequestFinish()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     mbFinishRequested = true;
 }
 
 bool Viewer::CheckFinish()
 {
+    EASY_BLOCK("Viewer::CheckFinish()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinishRequested;
 }
 
 void Viewer::SetFinish()
 {
+    EASY_BLOCK("Viewer::SetFinish()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     mbFinished = true;
 }
 
 bool Viewer::isFinished()
 {
+    EASY_BLOCK("Viewer::isFinished()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinished;
 }
 
 void Viewer::RequestStop()
 {
+    EASY_BLOCK("Viewer::RequestStop()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexStop);
     if(!mbStopped)
         mbStopRequested = true;
@@ -209,12 +218,14 @@ void Viewer::RequestStop()
 
 bool Viewer::isStopped()
 {
+    EASY_BLOCK("Viewer::isStopped()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexStop);
     return mbStopped;
 }
 
 bool Viewer::Stop()
 {
+    EASY_BLOCK("Viewer::Stop()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexStop);
     unique_lock<mutex> lock2(mMutexFinish);
 
@@ -233,6 +244,7 @@ bool Viewer::Stop()
 
 void Viewer::Release()
 {
+    EASY_BLOCK(" Viewer::Release()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexStop);
     mbStopped = false;
 }

@@ -53,7 +53,7 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     mpFrameDrawer(pFrameDrawer), mpMapDrawer(pMapDrawer), mpMap(pMap), mnLastRelocFrameId(0)
 {
     // Load camera parameters from settings file
-
+    EASY_BLOCK("Tracking::Tracking()", profiler::colors::Black);
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
@@ -153,22 +153,26 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
 
 void Tracking::SetLocalMapper(LocalMapping *pLocalMapper)
 {
+    EASY_BLOCK("Tracking::SetLocalMapper()", profiler::colors::Black);
     mpLocalMapper=pLocalMapper;
 }
 
 void Tracking::SetLoopClosing(LoopClosing *pLoopClosing)
 {
+    EASY_BLOCK("Tracking::SetLoopClosing()", profiler::colors::Black);
     mpLoopClosing=pLoopClosing;
 }
 
 void Tracking::SetViewer(Viewer *pViewer)
 {
+    EASY_BLOCK("Tracking::SetViewer()", profiler::colors::Black);
     mpViewer=pViewer;
 }
 
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
+    EASY_BLOCK("Tracking::GrabImageStereo()", profiler::colors::Black);
     mImGray = imRectLeft;
     cv::Mat imGrayRight = imRectRight;
 
@@ -209,6 +213,7 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
 
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
 {
+    EASY_BLOCK("Tracking::GrabImageRGBD", profiler::colors::Black);
     mImGray = imRGB;
     cv::Mat imDepth = imD;
 
@@ -564,6 +569,7 @@ void Tracking::Track()
 
 void Tracking::StereoInitialization()
 {
+    EASY_BLOCK("Tracking::StereoInitialization()", profiler::colors::Black);
     if(mCurrentFrame.N>500)
     {
         // Set Frame pose to the origin
@@ -629,11 +635,10 @@ void Tracking::StereoInitialization()
  */
 void Tracking::MonocularInitialization()
 {
-    EASY_FUNCTION(profiler::colors::Magenta);
+    EASY_BLOCK("Tracking::MonocularInitialization()", profiler::colors::Black);
     // If the monocular initializer has not been created, create a monocular initializer
     if(!mpInitializer)
     {
-        EASY_BLOCK("MonocularInitialization block(not Initialized)", profiler::colors::Magenta);
         // ORB feature points are extracted from, and matched with the Reference Frame Fr.
         // Set Reference Frame
         // The number of feature points of the monocular initial frame must be greater than 100
@@ -659,7 +664,7 @@ void Tracking::MonocularInitialization()
 
             return;
         }
-        EASY_END_BLOCK;
+
     }
     else
     {
@@ -733,7 +738,7 @@ void Tracking::MonocularInitialization()
             Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
-            EASY_END_BLOCK
+
 
             //  Step 6 : Pack the 3D points obtained by triangulation into MapPoints
             // Initialize function will get mvIniP3D
@@ -741,7 +746,7 @@ void Tracking::MonocularInitialization()
             // CreateInitialMapMonocular wraps 3D points to into MapPoint type and stores them in KeyFrame and Map
             CreateInitialMapMonocular();
         }
-        EASY_END_BLOCK
+
     }
 }
 
@@ -750,7 +755,7 @@ void Tracking::MonocularInitialization()
 */
 void Tracking::CreateInitialMapMonocular()
 {
-    EASY_BLOCK("CreateInitialMapMonocular() block", profiler::colors::Amber100);
+    EASY_BLOCK("Tracking::CreateInitialMapMonocular()", profiler::colors::Black);
     // Create KeyFrames
     KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpMap,mpKeyFrameDB); // initial KeyFrame
     KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB); // current KeyFrame
@@ -884,6 +889,7 @@ void Tracking::CreateInitialMapMonocular()
 
 void Tracking::CheckReplacedInLastFrame()
 {
+    EASY_BLOCK("Tracking::CheckReplacedInLastFrame()", profiler::colors::Black);
     for(int i =0; i<mLastFrame.N; i++)
     {
         MapPoint* pMP = mLastFrame.mvpMapPoints[i];
@@ -902,7 +908,7 @@ void Tracking::CheckReplacedInLastFrame()
 // Calculate the R,t of the current frame.
 bool Tracking::TrackReferenceKeyFrame()
 {
-    EASY_BLOCK("Tracking::TrackingReferenceKeyFrame()", profiler::colors::Cyan200);
+    EASY_BLOCK("Tracking::TrackReferenceKeyFrame()", profiler::colors::Cyan200);
     // Step 1: Convert the descriptor of the current into a BoW vector
     // Compute Bag of Words vector
     mCurrentFrame.ComputeBoW();
@@ -963,7 +969,7 @@ bool Tracking::TrackReferenceKeyFrame()
 
 void Tracking::UpdateLastFrame()
 {
-    EASY_BLOCK("Tracking::UpdateLastFrame()", profiler::colors::Cyan200);
+    EASY_BLOCK("Tracking::UpdateLastFrame()", profiler::colors::Black);
     // Update pose according to reference keyframe
     KeyFrame* pRef = mLastFrame.mpReferenceKF;
     cv::Mat Tlr = tracked_frames.back().relative_frame_pose;
@@ -1030,7 +1036,7 @@ void Tracking::UpdateLastFrame()
 
 bool Tracking::TrackWithMotionModel()
 {
-    EASY_BLOCK("Tracking::TrackingWithMotionModel()", profiler::colors::Cyan200);
+    EASY_BLOCK("Tracking::TrackWithMotionModel()", profiler::colors::Cyan200);
     ORBmatcher matcher(0.9,true);
 
     // Update last frame pose according to its reference keyframe
@@ -1142,7 +1148,7 @@ bool Tracking::TrackLocalMap()
 
 bool Tracking::NeedNewKeyFrame()
 {
-    EASY_BLOCK("NeedNewKeyFrame()", profiler::colors::Cyan200);
+    EASY_BLOCK("Tracking::NeedNewKeyFrame()", profiler::colors::Cyan200);
     if(mbOnlyTracking)
         return false;
 
@@ -1721,6 +1727,7 @@ void Tracking::Reset()
 
 void Tracking::ChangeCalibration(const string &strSettingPath)
 {
+    EASY_BLOCK("Tracking::ChangeCalibration()", profiler::colors::Cyan200);
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
@@ -1754,6 +1761,7 @@ void Tracking::ChangeCalibration(const string &strSettingPath)
 
 void Tracking::InformOnlyTracking(const bool &flag)
 {
+    EASY_BLOCK("Tracking::InformOnlyTracking()", profiler::colors::Cyan200);
     mbOnlyTracking = flag;
 }
 
