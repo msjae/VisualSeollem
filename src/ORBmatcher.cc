@@ -25,8 +25,6 @@
 #include<opencv2/core/core.hpp>
 #include<opencv2/features2d/features2d.hpp>
 
-#include <easy/profiler.h>
-
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
 #include<stdint-gcc.h>
@@ -46,6 +44,7 @@ ORBmatcher::ORBmatcher(float nnratio, bool checkOri): mfNNratio(nnratio), mbChec
 
 int ORBmatcher::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoints, const float th)
 {
+    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Green);
     int nmatches=0;
 
     const bool bFactor = th!=1.0;
@@ -80,7 +79,7 @@ int ORBmatcher::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
         int bestDist2=256;
         int bestLevel2 = -1;
         int bestIdx =-1 ;
-
+;
         // Get best and second matches with near keypoints
         for(vector<size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
         {
@@ -132,6 +131,7 @@ int ORBmatcher::SearchByProjection(Frame &F, const vector<MapPoint*> &vpMapPoint
 
 float ORBmatcher::RadiusByViewingCos(const float &viewCos)
 {
+    EASY_BLOCK("ORBmatcher::RadiusByViewingCos()", profiler::colors::Green);
     if(viewCos>0.998)
         return 2.5;
     else
@@ -141,6 +141,7 @@ float ORBmatcher::RadiusByViewingCos(const float &viewCos)
 
 bool ORBmatcher::CheckDistEpipolarLine(const cv::KeyPoint &kp1,const cv::KeyPoint &kp2,const cv::Mat &F12,const KeyFrame* pKF2)
 {
+    EASY_BLOCK("ORBmatcher::CheckDistEpipolarLine()", profiler::colors::Green);
     // Epipolar line in second image l = x1'F12 = [a b c]
     const float a = kp1.pt.x*F12.at<float>(0,0)+kp1.pt.y*F12.at<float>(1,0)+F12.at<float>(2,0);
     const float b = kp1.pt.x*F12.at<float>(0,1)+kp1.pt.y*F12.at<float>(1,1)+F12.at<float>(2,1);
@@ -160,7 +161,8 @@ bool ORBmatcher::CheckDistEpipolarLine(const cv::KeyPoint &kp1,const cv::KeyPoin
 
 int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPointMatches)
 {
-    EASY_BLOCK("ORBmatcher::SearchByBoW()", profiler::colors::Cyan700);
+    EASY_BLOCK("ORBmatcher::SearchByBow()", profiler::colors::Green);
+
     const vector<MapPoint*> vpMapPointsKF = pKF->GetMapPointMatches();
 
     vpMapPointMatches = vector<MapPoint*>(F.N,static_cast<MapPoint*>(NULL));
@@ -227,6 +229,7 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
                         bestDist2=dist;
                     }
                 }
+                EASY_END_BLOCK;
 
                 if(bestDist1<=TH_LOW)
                 {
@@ -292,7 +295,8 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
 
 int ORBmatcher::SearchByProjection(KeyFrame* pKF, cv::Mat Scw, const vector<MapPoint*> &vpPoints, vector<MapPoint*> &vpMatched, int th)
 {
-    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Cyan700);
+    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Green);
+
     // Get Calibration Parameters for later projection
     const float &fx = pKF->fx;
     const float &fy = pKF->fy;
@@ -408,6 +412,8 @@ int ORBmatcher::SearchByProjection(KeyFrame* pKF, cv::Mat Scw, const vector<MapP
 
 int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f> &vbPrevMatched, vector<int> &vnMatches12, int windowSize)
 {
+    EASY_BLOCK("ORBmatcher::SearchForInitialization()", profiler::colors::Green);
+
     int nmatches=0;
     vnMatches12 = vector<int>(F1.mvKeysUn.size(),-1);
 
@@ -512,6 +518,7 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f
                 }
             }
         }
+
     }
 
     //Update prev matched
@@ -524,6 +531,8 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f
 
 int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &vpMatches12)
 {
+    EASY_BLOCK("ORBmatcher::SearchByBow()", profiler::colors::Green);
+
     const vector<cv::KeyPoint> &vKeysUn1 = pKF1->mvKeysUn;
     const DBoW2::FeatureVector &vFeatVec1 = pKF1->mFeatVec;
     const vector<MapPoint*> vpMapPoints1 = pKF1->GetMapPointMatches();
@@ -660,7 +669,8 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12,
                                        vector<pair<size_t, size_t> > &vMatchedPairs, const bool bOnlyStereo)
 {
-    EASY_BLOCK("ORBmatcher::SearchForTriangulation()", profiler::colors::Cyan700);
+    EASY_BLOCK("ORBmatcher::SearchForTriangulation()", profiler::colors::Green);
+
     const DBoW2::FeatureVector &vFeatVec1 = pKF1->mFeatVec;
     const DBoW2::FeatureVector &vFeatVec2 = pKF2->mFeatVec;
 
@@ -828,7 +838,8 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
 
 int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const float th)
 {
-    EASY_BLOCK("ORBmatcher::Fuse()", profiler::colors::Cyan700);
+    EASY_BLOCK("ORBmatcher::Fuse()", profiler::colors::Green);
+
     cv::Mat Rcw = pKF->GetRotation();
     cv::Mat tcw = pKF->GetTranslation();
 
@@ -981,6 +992,9 @@ int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const
 
 int ORBmatcher::Fuse(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoints, float th, vector<MapPoint *> &vpReplacePoint)
 {
+
+    EASY_BLOCK("ORBmatcher::Fuse()", profiler::colors::Green);
+
     // Get Calibration Parameters for later projection
     const float &fx = pKF->fx;
     const float &fy = pKF->fy;
@@ -1107,43 +1121,64 @@ int ORBmatcher::Fuse(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoi
 int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &vpMatches12,
                              const float &s12, const cv::Mat &R12, const cv::Mat &t12, const float th)
 {
-    EASY_BLOCK("ORBmatcher::SearchBySim3()", profiler::colors::Cyan700);
+    EASY_BLOCK("ORBmatcher::SearchBySim3()", profiler::colors::Green);
+
+    // matcher.SearchBySim3(mpCurrentKF,pKF,vpMapPointMatches,s,R,t,7.5);
     const float &fx = pKF1->fx;
     const float &fy = pKF1->fy;
     const float &cx = pKF1->cx;
     const float &cy = pKF1->cy;
 
     // Camera 1 from world
-    cv::Mat R1w = pKF1->GetRotation();
-    cv::Mat t1w = pKF1->GetTranslation();
+    /*
+        cv::Mat KeyFrame::GetRotation()
+        {
+            unique_lock<mutex> lock(mMutexPose);
+            return Tcw.rowRange(0,3).colRange(0,3).clone();
+        }
+    */
+    cv::Mat R1w = pKF1->GetRotation(); // world to camera coordinate Rotation Matrix
+    cv::Mat t1w = pKF1->GetTranslation(); // world to camera coordinate Translation Matrix
 
     //Camera 2 from world
     cv::Mat R2w = pKF2->GetRotation();
     cv::Mat t2w = pKF2->GetTranslation();
 
     //Transformation between cameras
-    cv::Mat sR12 = s12*R12;
-    cv::Mat sR21 = (1.0/s12)*R12.t();
+    cv::Mat sR12 = s12*R12; // scale * rotation
+    cv::Mat sR21 = (1.0/s12)*R12.t(); // sR12의 inverse
     cv::Mat t21 = -sR21*t12;
+    // C = R * W + T
+    // W = R^(-1) * (C - T)
 
-    const vector<MapPoint*> vpMapPoints1 = pKF1->GetMapPointMatches();
-    const int N1 = vpMapPoints1.size();
 
-    const vector<MapPoint*> vpMapPoints2 = pKF2->GetMapPointMatches();
-    const int N2 = vpMapPoints2.size();
-
-    vector<bool> vbAlreadyMatched1(N1,false);
-    vector<bool> vbAlreadyMatched2(N2,false);
-
-    for(int i=0; i<N1; i++)
-    {
-        MapPoint* pMP = vpMatches12[i];
-        if(pMP)
+    /*
+        void KeyFrame::AddMapPoint(MapPoint *pMP, const size_t &idx)
         {
-            vbAlreadyMatched1[i]=true;
-            int idx2 = pMP->GetIndexInKeyFrame(pKF2);
-            if(idx2>=0 && idx2<N2)
-                vbAlreadyMatched2[idx2]=true;
+            unique_lock<mutex> lock(mMutexFeatures);
+            mvpMapPoints[idx]=pMP;
+        }
+    */
+
+    const vector<MapPoint*> vpMapPoints1 = pKF1->GetMapPointMatches(); // pKF1은 mpCurrentKF. GetMapPointMatches는 mvpMapPoints를 반환하는데, mvpMapPoints는 correspondence vector이다.
+    const int N1 = vpMapPoints1.size(); // correspondence의 개수언
+
+    const vector<MapPoint*> vpMapPoints2 = pKF2->GetMapPointMatches(); // pKF2는 pKF(후보 키프레임). 후보 키프레임의 correspondence vector이다.
+    const int N2 = vpMapPoints2.size(); // correspondence의 개수
+
+    vector<bool> vbAlreadyMatched1(N1,false); // correspondence의 개수만큼 공간을 할당해주고, false로 초기화
+    vector<bool> vbAlreadyMatched2(N2,false); // correspondence의 개수만큼 공간을 할당해주고, false로 초기화
+
+    for(int i=0; i<N1; i++) // 이 부분은 두 frame간의 매칭된 특징점(MP)들을 비교하여, 서로 공유하는 것이 있으면 vbAlreadyMatched를 true로 선
+    {
+        MapPoint* pMP = vpMatches12[i]; // vpMatches12는 vpMapPointMatches (inlier키포인트만 할당한 벡터. outlier인 경우 null 포인터)
+        // 하나의 맵포인트를 가리키는 포인터
+        if(pMP) // 포인터가 존재하는 경우, 즉 nullptr이 아닌, inlier인 경우
+        {
+            vbAlreadyMatched1[i]=true; // 해당 correspondence를 true로 할당
+            int idx2 = pMP->GetIndexInKeyFrame(pKF2); // 해당 맵포인트의 index를 pKF2에서 get 해본다
+            if(idx2>=0 && idx2<N2) // index가 존재하고(즉, pKF2에 해당 맵포인트가 존재하고), N2의 범위를 넘어서지 않는다면(넘는다면 매칭이 될 일이 없다는 것)
+                vbAlreadyMatched2[idx2]=true; // 그 correspondence를 true로 할당
         }
     }
 
@@ -1151,86 +1186,141 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
     vector<int> vnMatch2(N2,-1);
 
     // Transform from KF1 to KF2 and search
-    for(int i1=0; i1<N1; i1++)
+    for(int i1=0; i1<N1; i1++) // N1은 mpCurrenKF에서 correspondence의 개수
     {
-        MapPoint* pMP = vpMapPoints1[i1];
+        MapPoint* pMP = vpMapPoints1[i1]; // vpMapPoints1은 mpCurrenKF에서 correspondence의 벡터
 
-        if(!pMP || vbAlreadyMatched1[i1])
+        if(!pMP || vbAlreadyMatched1[i1]) // 맵포인트가 존재하거나, 이미 매칭된 녀석이라면 skip
             continue;
 
-        if(pMP->isBad())
+        if(pMP->isBad()) // 맵포인트가 존재하긴 하는데, isBad() 하다면 skip
             continue;
 
-        cv::Mat p3Dw = pMP->GetWorldPos();
-        cv::Mat p3Dc1 = R1w*p3Dw + t1w;
-        cv::Mat p3Dc2 = sR21*p3Dc1 + t21;
+        /*
+            cv::Mat MapPoint::GetWorldPos()
+            {
+                unique_lock<mutex> lock(mMutexPos);
+                return mWorldPos.clone();
+            }
+
+        */
+        cv::Mat p3Dw = pMP->GetWorldPos(); // 맵포인트의 월드좌표
+        cv::Mat p3Dc1 = R1w*p3Dw + t1w; // mpCurrentKF의 카메라 좌표로 바꾼다
+        cv::Mat p3Dc2 = sR21*p3Dc1 + t21; // scale된 R과 t를 이용하여 후보 키프레임에서의 카메라 좌표를 구한다.
+
+        // p3Dc1, p3Dc2 = (x_c, y_c, z_c)
 
         // Depth must be positive
         if(p3Dc2.at<float>(2)<0.0)
             continue;
 
-        const float invz = 1.0/p3Dc2.at<float>(2);
-        const float x = p3Dc2.at<float>(0)*invz;
-        const float y = p3Dc2.at<float>(1)*invz;
+        // 정규화 과정
+        const float invz = 1.0/p3Dc2.at<float>(2); // 1 / z_c
+        const float x = p3Dc2.at<float>(0)*invz; // x_c / invz
+        const float y = p3Dc2.at<float>(1)*invz; // y_c / invz
 
-        const float u = fx*x+cx;
-        const float v = fy*y+cy;
+
+        const float u = fx*x+cx; // 이미지 픽셀 좌표
+        const float v = fy*y+cy; // 이미지 픽셀 좌표
 
         // Point must be inside the image
-        if(!pKF2->IsInImage(u,v))
+        if(!pKF2->IsInImage(u,v)) // 맵포인트 픽셀 좌표가 후보 키프레임 안에 없다면 skip
             continue;
 
-        const float maxDistance = pMP->GetMaxDistanceInvariance();
-        const float minDistance = pMP->GetMinDistanceInvariance();
-        const float dist3D = cv::norm(p3Dc2);
+
+
+
+        /*
+            float MapPoint::GetMaxDistanceInvariance()
+            {
+                unique_lock<mutex> lock(mMutexPos);
+                return 1.2f*mfMaxDistance;
+            }
+
+            float MapPoint::GetMinDistanceInvariance()
+            {
+                unique_lock<mutex> lock(mMutexPos);
+                return 0.8f*mfMinDistance;
+            }
+         */
+        // Check distance is in the scale invariance region of the MapPoint
+        const float maxDistance = pMP->GetMaxDistanceInvariance(); // pMP의 max distance를 구한다
+        const float minDistance = pMP->GetMinDistanceInvariance(); // pMP의 min distance를 구한다
+        const float dist3D = cv::norm(p3Dc2); // 카메라에서 바라본 맵포인트의 좌표의 distance
 
         // Depth must be inside the scale invariance region
-        if(dist3D<minDistance || dist3D>maxDistance )
+        if(dist3D<minDistance || dist3D>maxDistance ) // 카메라로부터의 물체의 거리가 범위 안에 있지 않다면 skip
             continue;
 
+        // octave (pyramid layer) from which the keypoint has been extracted : 키포인트가 추출된 피라미드 레이어(번째)
         // Compute predicted octave
-        const int nPredictedLevel = pMP->PredictScale(dist3D,pKF2);
+        /*
+            int MapPoint::PredictScale(const float &currentDist, KeyFrame* pKF)
+            {
+                float ratio;
+                {
+                    unique_lock<mutex> lock(mMutexPos);
+                    ratio = mfMaxDistance/currentDist;
+                }
+
+                int nScale = ceil(log(ratio)/pKF->mfLogScaleFactor);
+                if(nScale<0)
+                    nScale = 0;
+                else if(nScale>=pKF->mnScaleLevels)
+                    nScale = pKF->mnScaleLevels-1;
+
+                return nScale;
+            }
+         */
+        const int nPredictedLevel = pMP->PredictScale(dist3D,pKF2); // 예상되는 nScale을 구한다.
 
         // Search in a radius
         const float radius = th*pKF2->mvScaleFactors[nPredictedLevel];
+        // 예상되는 스케일의 값을 미리 정해진 scale vector에서 뽑아낸다. th는 매개변수로서, 7.5로 받는다.
+        // 두 개를 곱해주면 radius가 어떻게 나오지..?
 
         const vector<size_t> vIndices = pKF2->GetFeaturesInArea(u,v,radius);
+        // Collects features which lie in a certain area around a point
+        // GetFeaturesInArea(u, v, radius)를 통하여 vIndices를 구한다.
+        // vIndices는 원 안에 있는 mvKeysUn의 원소의 인덱스
 
-        if(vIndices.empty())
+        if(vIndices.empty()) // 구한 Indices vector가 비어있다면 skip
             continue;
 
         // Match to the most similar keypoint in the radius
-        const cv::Mat dMP = pMP->GetDescriptor();
+        const cv::Mat dMP = pMP->GetDescriptor(); // 맵포인트의 descriptor를 얻는다
 
         int bestDist = INT_MAX;
         int bestIdx = -1;
         for(vector<size_t>::const_iterator vit=vIndices.begin(), vend=vIndices.end(); vit!=vend; vit++)
         {
-            const size_t idx = *vit;
+            const size_t idx = *vit; // idx는 vIndices의 원소. 아마 특징점이라고 보면 될 듯?
 
-            const cv::KeyPoint &kp = pKF2->mvKeysUn[idx];
+            const cv::KeyPoint &kp = pKF2->mvKeysUn[idx]; // mvKeysUn는 undistort된 키포인트이다.
 
             if(kp.octave<nPredictedLevel-1 || kp.octave>nPredictedLevel)
+                // 예측된 스케일보다 octave가 높거나, 예측된 스케일 레벨 전단계가 옥타브가 크다면 skip
+                // 즉, 같거나, 한단계 낮은 예측만 허용
                 continue;
 
-            const cv::Mat &dKF = pKF2->mDescriptors.row(idx);
+            const cv::Mat &dKF = pKF2->mDescriptors.row(idx); // 후보 키프레임에 존재하는 특징점 디스크립터를 가져온다.
 
-            const int dist = DescriptorDistance(dMP,dKF);
+            const int dist = DescriptorDistance(dMP,dKF); // 해밍 디스턴스를 가져온다
 
-            if(dist<bestDist)
+            if(dist<bestDist) // bestDist보다 더 작다면(작을 수록 좋다)
             {
-                bestDist = dist;
-                bestIdx = idx;
+                bestDist = dist; // bestDist를 갱신한다
+                bestIdx = idx; // bestIdx를 갱신한다
             }
         }
 
-        if(bestDist<=TH_HIGH)
+        if(bestDist<=TH_HIGH) // TH_HIGH를 100으로 정해 놨음.
         {
-            vnMatch1[i1]=bestIdx;
+            vnMatch1[i1]=bestIdx; // i1은 mpCurrentKF의 correspondence. 매칭된 index를 벡터에 넣는다.
         }
     }
 
-    // Transform from KF2 to KF2 and search
+    // Transform from KF2 to KF2 and search : 위와 동
     for(int i2=0; i2<N2; i2++)
     {
         MapPoint* pMP = vpMapPoints2[i2];
@@ -1299,8 +1389,8 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
 
             if(dist<bestDist)
             {
-                bestDist = dist;
-                bestIdx = idx;
+                bestDist = dist; // 원 안에 있는 특징점 후보 하나의 해밍디스턴스의 거리
+                bestIdx = idx; // 원 안에 있는 특징점 후보 중 하나의 해밍디스턴스가 가장 작은 것의 인덱스
             }
         }
 
@@ -1315,7 +1405,7 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
 
     for(int i1=0; i1<N1; i1++)
     {
-        int idx2 = vnMatch1[i1];
+        int idx2 = vnMatch1[i1]; // vnMatch1[i1]=bestIdx;
 
         if(idx2>=0)
         {
@@ -1333,6 +1423,8 @@ int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &
 
 int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, const float th, const bool bMono)
 {
+    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Green);
+
     int nmatches = 0;
 
     // Rotation Histogram (to check rotation consistency)
@@ -1477,6 +1569,8 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame, 
 
 int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set<MapPoint*> &sAlreadyFound, const float th , const int ORBdist)
 {
+    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Green);
+
     int nmatches = 0;
 
     const cv::Mat Rcw = CurrentFrame.mTcw.rowRange(0,3).colRange(0,3);
@@ -1606,6 +1700,8 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF, const set
 
 void ORBmatcher::ComputeThreeMaxima(vector<int>* histo, const int L, int &ind1, int &ind2, int &ind3)
 {
+    EASY_BLOCK("ORBmatcher::ComputeThreeMaxima()", profiler::colors::Green);
+
     int max1=0;
     int max2=0;
     int max3=0;
@@ -1652,6 +1748,8 @@ void ORBmatcher::ComputeThreeMaxima(vector<int>* histo, const int L, int &ind1, 
 // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
 int ORBmatcher::DescriptorDistance(const cv::Mat &a, const cv::Mat &b)
 {
+    EASY_BLOCK("ORBmatcher::DescriptorDistance()", profiler::colors::Green);
+
     const int *pa = a.ptr<int32_t>();
     const int *pb = b.ptr<int32_t>();
 
