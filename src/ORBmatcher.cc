@@ -29,6 +29,8 @@
 
 #include<stdint-gcc.h>
 
+#include "easy/profiler.h"
+
 using namespace std;
 
 namespace ORB_SLAM2
