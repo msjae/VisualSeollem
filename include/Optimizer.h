@@ -33,6 +33,9 @@
 #include "Frame.h"
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 
+#define USING_EASY_PROFILER
+#include "easy/profiler.h"
+
 namespace g2o { struct Sim3; }
 
 namespace ORB_SLAM2
