@@ -60,6 +60,8 @@
 #include "Frame.h"
 #include "MapPoint.h"
 
+#include "easy/profiler.h"
+
 
 
 using namespace std;
