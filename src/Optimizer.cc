@@ -32,6 +32,8 @@
 
 #include "Converter.h"
 
+#include "easy/profiler.h"
+
 #include<mutex>
 
 namespace ORB_SLAM2
