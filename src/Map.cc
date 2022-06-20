@@ -44,12 +44,14 @@ void Map::AddKeyFrame(KeyFrame *pKF)
 
 void Map::AddMapPoint(MapPoint *pMP)
 {
+    EASY_BLOCK("Map::AddMapPoint()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mspMapPoints.insert(pMP);
 }
 
 void Map::EraseMapPoint(MapPoint *pMP)
 {
+    EASY_BLOCK("Map::EraseMapPoint()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mspMapPoints.erase(pMP);
 
@@ -59,6 +61,7 @@ void Map::EraseMapPoint(MapPoint *pMP)
 
 void Map::EraseKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("Map::EraseKeyPoint()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mspKeyFrames.erase(pKF);
 
@@ -68,60 +71,70 @@ void Map::EraseKeyFrame(KeyFrame *pKF)
 
 void Map::SetReferenceMapPoints(const vector<MapPoint *> &vpMPs)
 {
+    EASY_BLOCK("Map::SetReferenceMapPoints()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mvpReferenceMapPoints = vpMPs;
 }
 
 void Map::InformNewBigChange()
 {
+    EASY_BLOCK("Map::InformNewBigChange()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mnBigChangeIdx++;
 }
 
 int Map::GetLastBigChangeIdx()
 {
+    EASY_BLOCK("Map::GetLastBigChangeIdx()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return mnBigChangeIdx;
 }
 
 vector<KeyFrame*> Map::GetAllKeyFrames()
 {
+    EASY_BLOCK("Map::GetAllKeyFrames()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return vector<KeyFrame*>(mspKeyFrames.begin(),mspKeyFrames.end());
 }
 
 vector<MapPoint*> Map::GetAllMapPoints()
 {
+    EASY_BLOCK("Map::GetAllMapPoints()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return vector<MapPoint*>(mspMapPoints.begin(),mspMapPoints.end());
 }
 
 long unsigned int Map::MapPointsInMap()
 {
+    EASY_BLOCK("Map::MapPointsInMap()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return mspMapPoints.size();
 }
 
 long unsigned int Map::KeyFramesInMap()
 {
+    EASY_BLOCK("Map::KeyFramesInMap()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return mspKeyFrames.size();
 }
 
 vector<MapPoint*> Map::GetReferenceMapPoints()
 {
+    EASY_BLOCK("Map::SetReferenceMapPoints()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return mvpReferenceMapPoints;
 }
 
 long unsigned int Map::GetMaxKFid()
 {
+    EASY_BLOCK("Map::GetMaxKFid()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     return mnMaxKFid;
 }
 
 void Map::clear()
 {
+    EASY_BLOCK("Map::clear()", profiler::colors::Cyan600);
     for(set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
         delete *sit;
 

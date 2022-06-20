@@ -26,6 +26,7 @@
 #include <mutex>
 #include <set>
 #include <vector>
+#include <easy/profiler.h>
 
 #include "MapPoint.h"
 #include "KeyFrame.h"
@@ -50,6 +51,7 @@ MapDrawer::MapDrawer(Map* pMap, const string &strSettingPath):mpMap(pMap)
 
 void MapDrawer::DrawMapPoints()
 {
+    EASY_BLOCK("MapDrawer::DrawMapPoints()", profiler::colors::Cyan600);
     const vector<MapPoint*> &vpMPs = mpMap->GetAllMapPoints();
     const vector<MapPoint*> &vpRefMPs = mpMap->GetReferenceMapPoints();
 
@@ -89,6 +91,7 @@ void MapDrawer::DrawMapPoints()
 
 void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
 {
+    EASY_BLOCK("MapDrawer::DrawKeyFrames()", profiler::colors::Cyan600);
     const float &w = mKeyFrameSize;
     const float h = w*0.75;
     const float z = w*0.6;
@@ -185,6 +188,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph)
 
 void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 {
+    EASY_BLOCK("MapDrawer::DrawCurrentCamera()", profiler::colors::Cyan600);
     const float &w = mCameraSize;
     const float h = w*0.75;
     const float z = w*0.6;
@@ -228,12 +232,14 @@ void MapDrawer::DrawCurrentCamera(pangolin::OpenGlMatrix &Twc)
 
 void MapDrawer::SetCurrentCameraPose(const cv::Mat &Tcw)
 {
+    EASY_BLOCK("MapDrawer::SetCurrentCameraPose()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexCamera);
     mCameraPose = Tcw.clone();
 }
 
 void MapDrawer::GetCurrentOpenGLCameraMatrix(pangolin::OpenGlMatrix &M)
 {
+    EASY_BLOCK("MapDrawer::GetCurrentOpenGLCameraMatrix()", profiler::colors::Cyan600);
     if(!mCameraPose.empty())
     {
         cv::Mat Rwc(3,3,CV_32F);

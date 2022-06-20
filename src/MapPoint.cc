@@ -26,6 +26,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <easy/profiler.h>
 
 #include "ORBmatcher.h"
 #include "Frame.h"
@@ -83,6 +84,7 @@ MapPoint::MapPoint(const cv::Mat &Pos, Map* pMap, Frame* pFrame, const int &idxF
 
 void MapPoint::SetWorldPos(const cv::Mat &Pos)
 {
+    EASY_BLOCK("MapPoint::SetWorldPos()", profiler::colors::Cyan600);
     unique_lock<mutex> lock2(mGlobalMutex);
     unique_lock<mutex> lock(mMutexPos);
     Pos.copyTo(mWorldPos);
@@ -108,6 +110,7 @@ KeyFrame* MapPoint::GetReferenceKeyFrame()
 
 void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
 {
+    EASY_BLOCK("MapPoint::AddObservation()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     if(mObservations.count(pKF))
         return;
@@ -121,6 +124,7 @@ void MapPoint::AddObservation(KeyFrame* pKF, size_t idx)
 
 void MapPoint::EraseObservation(KeyFrame* pKF)
 {
+    EASY_BLOCK("MapPoint::EraseObservation()", profiler::colors::Cyan600);
     bool bBad=false;
     {
         unique_lock<mutex> lock(mMutexFeatures);
@@ -155,12 +159,14 @@ map<KeyFrame*, size_t> MapPoint::GetObservations()
 
 int MapPoint::Observations()
 {
+    EASY_BLOCK("MapPoint::Observations()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     return nObs;
 }
 
 void MapPoint::SetBadFlag()
 {
+    EASY_BLOCK("MapPoint::SetBadFlag()", profiler::colors::Cyan600);
     map<KeyFrame*,size_t> obs;
     {
         unique_lock<mutex> lock1(mMutexFeatures);
@@ -187,6 +193,7 @@ MapPoint* MapPoint::GetReplaced()
 
 void MapPoint::Replace(MapPoint* pMP)
 {
+    EASY_BLOCK("MapPoint::Replace()", profiler::colors::Cyan600);
     if(pMP->mnId==this->mnId)
         return;
 
@@ -227,6 +234,7 @@ void MapPoint::Replace(MapPoint* pMP)
 
 bool MapPoint::isBad()
 {
+    EASY_BLOCK("MapPoint::isBad()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     unique_lock<mutex> lock2(mMutexPos);
     return mbBad;
@@ -234,24 +242,28 @@ bool MapPoint::isBad()
 
 void MapPoint::IncreaseVisible(int n)
 {
+    EASY_BLOCK("MapPoint::IncreaseVisible()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     mnVisible+=n;
 }
 
 void MapPoint::IncreaseFound(int n)
 {
+    EASY_BLOCK("MapPoint::IncreaseFound()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     mnFound+=n;
 }
 
 float MapPoint::GetFoundRatio()
 {
+    EASY_BLOCK("MapPoint::GetFoundRatio()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     return static_cast<float>(mnFound)/mnVisible;
 }
 
 void MapPoint::ComputeDistinctiveDescriptors()
 {
+    EASY_BLOCK("MapPoint::ComputeDistinctiveDescriptors()", profiler::colors::Cyan600);
     // Retrieve all observed descriptors
     vector<cv::Mat> vDescriptors;
 
@@ -325,6 +337,7 @@ cv::Mat MapPoint::GetDescriptor()
 
 int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("MapPoint::GetIndexInKeyFrame()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     if(mObservations.count(pKF))
         return mObservations[pKF];
@@ -334,12 +347,14 @@ int MapPoint::GetIndexInKeyFrame(KeyFrame *pKF)
 
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("MapPoint::IsInKeyFrame()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexFeatures);
     return (mObservations.count(pKF));
 }
 
 void MapPoint::UpdateNormalAndDepth()
 {
+    EASY_BLOCK("MapPoint::UpdateNormalAndDepth()", profiler::colors::Cyan600);
     map<KeyFrame*,size_t> observations;
     KeyFrame* pRefKF;
     cv::Mat Pos;
@@ -383,18 +398,21 @@ void MapPoint::UpdateNormalAndDepth()
 
 float MapPoint::GetMinDistanceInvariance()
 {
+    EASY_BLOCK("MapPoint::GetMinDistanceInvariance()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexPos);
     return 0.8f*mfMinDistance;
 }
 
 float MapPoint::GetMaxDistanceInvariance()
 {
+    EASY_BLOCK("MapPoint::GetMaxDistanceInvariance()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexPos);
     return 1.2f*mfMaxDistance;
 }
 
 int MapPoint::PredictScale(const float &currentDist, KeyFrame* pKF)
 {
+    EASY_BLOCK("MapPoint::PredictScale()", profiler::colors::Cyan600);
     float ratio;
     {
         unique_lock<mutex> lock(mMutexPos);
@@ -412,6 +430,7 @@ int MapPoint::PredictScale(const float &currentDist, KeyFrame* pKF)
 
 int MapPoint::PredictScale(const float &currentDist, Frame* pF)
 {
+    EASY_BLOCK("MapPoint::PredictScale()", profiler::colors::Cyan600);
     float ratio;
     {
         unique_lock<mutex> lock(mMutexPos);
