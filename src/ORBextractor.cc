@@ -74,6 +74,8 @@
 using namespace cv;
 using namespace std;
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
@@ -84,6 +86,7 @@ const int EDGE_THRESHOLD = 19;
 
 static float IC_Angle(const Mat& image, Point2f pt,  const vector<int> & u_max)
 {
+    EASY_BLOCK("IC_Angle", profiler::colors::Black);
     int m_01 = 0, m_10 = 0;
 
     const uchar* center = &image.at<uchar> (cvRound(pt.y), cvRound(pt.x));
@@ -117,6 +120,7 @@ static void computeOrbDescriptor(const KeyPoint& kpt,
                                  const Mat& img, const Point* pattern,
                                  uchar* desc)
 {
+    EASY_BLOCK("computeOrbDescriptor", profiler::colors::Black);
     float angle = (float)kpt.angle*factorPI;
     float a = (float)cos(angle), b = (float)sin(angle);
 
@@ -420,6 +424,7 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
     nfeatures(_nfeatures), scaleFactor(_scaleFactor), nlevels(_nlevels),
     iniThFAST(_iniThFAST), minThFAST(_minThFAST)
 {
+    EASY_BLOCK("ORBextractor::ORBextractor", profiler::colors::Black);
     mvScaleFactor.resize(nlevels);
     mvLevelSigma2.resize(nlevels);
     mvScaleFactor[0]=1.0f;
@@ -479,6 +484,7 @@ ORBextractor::ORBextractor(int _nfeatures, float _scaleFactor, int _nlevels,
 
 static void computeOrientation(const Mat& image, vector<KeyPoint>& keypoints, const vector<int>& umax)
 {
+    EASY_BLOCK("computeOrientation", profiler::colors::Black);
     for (vector<KeyPoint>::iterator keypoint = keypoints.begin(),
          keypointEnd = keypoints.end(); keypoint != keypointEnd; ++keypoint)
     {
@@ -488,6 +494,7 @@ static void computeOrientation(const Mat& image, vector<KeyPoint>& keypoints, co
 
 void ExtractorNode::DivideNode(ExtractorNode &n1, ExtractorNode &n2, ExtractorNode &n3, ExtractorNode &n4)
 {
+    EASY_BLOCK("ExtractorNode::DivideNode", profiler::colors::Black);
     const int halfX = ceil(static_cast<float>(UR.x-UL.x)/2);
     const int halfY = ceil(static_cast<float>(BR.y-UL.y)/2);
 
@@ -773,6 +780,7 @@ vector<cv::KeyPoint> ORBextractor::DistributeOctTree(const vector<cv::KeyPoint>&
 
 void ORBextractor::ComputeKeyPointsOctTree(vector<vector<KeyPoint> >& allKeypoints)
 {
+    EASY_BLOCK("ORBextractor::ComputeKeyPointsOctTree", profiler::colors::Black);
     allKeypoints.resize(nlevels);
 
     const float W = 30;
@@ -863,6 +871,7 @@ void ORBextractor::ComputeKeyPointsOctTree(vector<vector<KeyPoint> >& allKeypoin
 
 void ORBextractor::ComputeKeyPointsOld(std::vector<std::vector<KeyPoint> > &allKeypoints)
 {
+    EASY_BLOCK("ORBextractor::ComputeKeyPointsOld", profiler::colors::Black);
     allKeypoints.resize(nlevels);
 
     float imageRatio = (float)mvImagePyramid[0].cols/mvImagePyramid[0].rows;

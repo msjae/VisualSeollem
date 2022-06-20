@@ -44,6 +44,7 @@ namespace DBoW2 { class BowVector; }
 #include<mutex>
 #include<thread>
 
+EASY_PROFILER_ENABLE;
 
 namespace ORB_SLAM2
 {
@@ -53,16 +54,19 @@ LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, 
     mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
     mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale), mnFullBAIdx(0)
 {
+    EASY_BLOCK("LoopClosing::LoopClosing", profiler::colors::Black);
     mnCovisibilityConsistencyTh = 3;
 }
 
 void LoopClosing::SetTracker(Tracking *pTracker)
 {
+    EASY_BLOCK("LoopClosing::SetTracker", profiler::colors::Black);
     mpTracker=pTracker;
 }
 
 void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 {
+    EASY_BLOCK("LoopClosing::SetLocalMapper", profiler::colors::Black);
     mpLocalMapper=pLocalMapper;
 }
 
@@ -112,6 +116,7 @@ void LoopClosing::InsertKeyFrame(KeyFrame *pKF)
 
 bool LoopClosing::CheckNewKeyFrames()
 {
+    EASY_BLOCK("LoopClosing::CheckNewKeyFrames", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexLoopQueue);
     return(!mlpLoopKeyFrameQueue.empty());
 }
@@ -635,6 +640,7 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
 
 void LoopClosing::RequestReset()
 {
+    EASY_BLOCK("LoopClosing::RequestReset", profiler::colors::Black);
     {
         unique_lock<mutex> lock(mMutexReset);
         mbResetRequested = true;
@@ -653,6 +659,7 @@ void LoopClosing::RequestReset()
 
 void LoopClosing::ResetIfRequested()
 {
+    EASY_BLOCK("LoopClosing::ResetIfRequested", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexReset);
     if(mbResetRequested)
     {
@@ -771,24 +778,28 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 
 void LoopClosing::RequestFinish()
 {
+    EASY_BLOCK("LoopClosing::RequestFinish", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     mbFinishRequested = true;
 }
 
 bool LoopClosing::CheckFinish()
 {
+    EASY_BLOCK("LoopClosing::CheckFinish", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinishRequested;
 }
 
 void LoopClosing::SetFinish()
 {
+    EASY_BLOCK("LoopClosing::SetFinish", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     mbFinished = true;
 }
 
 bool LoopClosing::isFinished()
 {
+    EASY_BLOCK("LoopClosing::isFinished", profiler::colors::Black);
     unique_lock<mutex> lock(mMutexFinish);
     return mbFinished;
 }

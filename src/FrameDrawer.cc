@@ -31,17 +31,21 @@
 
 #include<mutex>
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
 FrameDrawer::FrameDrawer(Map* pMap):mpMap(pMap)
 {
+    EASY_BLOCK("Frame::FrameDrawer()", profiler::colors::Black);
     mState=Tracking::SYSTEM_NOT_READY;
     mIm = cv::Mat(480,640,CV_8UC3, cv::Scalar(0,0,0));
 }
 
 cv::Mat FrameDrawer::DrawFrame()
 {
+    EASY_BLOCK("Frame::DrawFrame()", profiler::colors::Black);
     cv::Mat im;
     vector<cv::KeyPoint> vIniKeys; // Initialization: KeyPoints in reference frame
     vector<int> vMatches; // Initialization: correspondeces with reference keypoints
@@ -133,6 +137,7 @@ cv::Mat FrameDrawer::DrawFrame()
 
 void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
 {
+    EASY_BLOCK("Frame::DrawTextInfo()", profiler::colors::Black);
     stringstream s;
     if(nState==Tracking::NO_IMAGES_YET)
         s << " WAITING FOR IMAGES";
@@ -171,6 +176,7 @@ void FrameDrawer::DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText)
 
 void FrameDrawer::Update(Tracking *pTracker)
 {
+    EASY_BLOCK("Frame::Update()", profiler::colors::Black);
     unique_lock<mutex> lock(mMutex);
     pTracker->mImGray.copyTo(mIm);
     mvCurrentKeys=pTracker->mCurrentFrame.mvKeys;

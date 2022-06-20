@@ -25,6 +25,8 @@
 #include <list>
 #include <opencv2/core.hpp>
 
+#define USING_EASY_PROFILER
+#include "easy/profiler.h"
 
 namespace ORB_SLAM2
 {

@@ -25,11 +25,14 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
 std::vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors)
-{
+{   
+    EASY_BLOCK("Converter::toDescriptorVector()", profiler::colors::Black);
     std::vector<cv::Mat> vDesc;
     vDesc.reserve(Descriptors.rows);
     for (int j=0;j<Descriptors.rows;j++)
@@ -38,8 +41,10 @@ std::vector<cv::Mat> Converter::toDescriptorVector(const cv::Mat &Descriptors)
     return vDesc;
 }
 
+
 g2o::SE3Quat Converter::toSE3Quat(const cv::Mat &cvT)
 {
+    EASY_BLOCK("Converter::toSE3Quat()", profiler::colors::Black);
     Eigen::Matrix<double,3,3> R;
     R << cvT.at<float>(0,0), cvT.at<float>(0,1), cvT.at<float>(0,2),
          cvT.at<float>(1,0), cvT.at<float>(1,1), cvT.at<float>(1,2),
@@ -52,12 +57,14 @@ g2o::SE3Quat Converter::toSE3Quat(const cv::Mat &cvT)
 
 cv::Mat Converter::toCvMat(const g2o::SE3Quat &SE3)
 {
+    EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     Eigen::Matrix<double,4,4> eigMat = SE3.to_homogeneous_matrix();
     return toCvMat(eigMat);
 }
 
 cv::Mat Converter::toCvMat(const g2o::Sim3 &Sim3)
 {
+    EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     Eigen::Matrix3d eigR = Sim3.rotation().toRotationMatrix();
     Eigen::Vector3d eigt = Sim3.translation();
     double s = Sim3.scale();
@@ -66,16 +73,18 @@ cv::Mat Converter::toCvMat(const g2o::Sim3 &Sim3)
 
 cv::Mat Converter::toCvMat(const Eigen::Matrix<double,4,4> &m)
 {
+    EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     cv::Mat cvMat(4,4,CV_32F);
-    for(int i=0;i<4;i++)
+    for(int i=0;i<4;i++)x   
         for(int j=0; j<4; j++)
             cvMat.at<float>(i,j)=m(i,j);
 
     return cvMat.clone();
 }
-
-cv::Mat Converter::toCvMat(const Eigen::Matrix3d &m)
+const Eigen::Matrix3d &m
+cv::Mat Converter::toCvMat()
 {
+    EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     cv::Mat cvMat(3,3,CV_32F);
     for(int i=0;i<3;i++)
         for(int j=0; j<3; j++)
@@ -86,6 +95,7 @@ cv::Mat Converter::toCvMat(const Eigen::Matrix3d &m)
 
 cv::Mat Converter::toCvMat(const Eigen::Matrix<double,3,1> &m)
 {
+    EASY_BLOCK("Converter::toCvMat()", profiler::colors::Black);
     cv::Mat cvMat(3,1,CV_32F);
     for(int i=0;i<3;i++)
             cvMat.at<float>(i)=m(i);
@@ -95,6 +105,7 @@ cv::Mat Converter::toCvMat(const Eigen::Matrix<double,3,1> &m)
 
 cv::Mat Converter::toCvSE3(const Eigen::Matrix<double,3,3> &R, const Eigen::Matrix<double,3,1> &t)
 {
+    EASY_BLOCK("Converter::toCvSE3", profiler::colors::Black);
     cv::Mat cvMat = cv::Mat::eye(4,4,CV_32F);
     for(int i=0;i<3;i++)
     {
@@ -113,6 +124,7 @@ cv::Mat Converter::toCvSE3(const Eigen::Matrix<double,3,3> &R, const Eigen::Matr
 
 Eigen::Matrix<double,3,1> Converter::toVector3d(const cv::Mat &cvVector)
 {
+    EASY_BLOCK("Converter::toVector3d", profiler::colors::Black);
     Eigen::Matrix<double,3,1> v;
     v << cvVector.at<float>(0), cvVector.at<float>(1), cvVector.at<float>(2);
 
@@ -121,6 +133,7 @@ Eigen::Matrix<double,3,1> Converter::toVector3d(const cv::Mat &cvVector)
 
 Eigen::Matrix<double,3,1> Converter::toVector3d(const cv::Point3f &cvPoint)
 {
+    EASY_BLOCK("Converter::toVector3d", profiler::colors::Black);
     Eigen::Matrix<double,3,1> v;
     v << cvPoint.x, cvPoint.y, cvPoint.z;
 
@@ -129,6 +142,7 @@ Eigen::Matrix<double,3,1> Converter::toVector3d(const cv::Point3f &cvPoint)
 
 Eigen::Matrix<double,3,3> Converter::toMatrix3d(const cv::Mat &cvMat3)
 {
+    EASY_BLOCK("Converter::toMatrix3d", profiler::colors::Black);
     Eigen::Matrix<double,3,3> M;
 
     M << cvMat3.at<float>(0,0), cvMat3.at<float>(0,1), cvMat3.at<float>(0,2),
@@ -140,6 +154,7 @@ Eigen::Matrix<double,3,3> Converter::toMatrix3d(const cv::Mat &cvMat3)
 
 std::vector<float> Converter::toQuaternion(const cv::Mat &M)
 {
+    EASY_BLOCK("Converter::toQuaternion", profiler::colors::Black);
     Eigen::Matrix<double,3,3> eigMat = toMatrix3d(M);
     Eigen::Quaterniond q(eigMat);
 
