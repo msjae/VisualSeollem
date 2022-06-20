@@ -29,6 +29,9 @@
 
 #include "KeyFrame.h"
 
+#define USING_EASY_PROFILER
+#include "easy/profiler.h"
+
 
 
 namespace ORB_SLAM2
