@@ -37,6 +37,8 @@
 #include "MapPoint.h"
 #include "ORBextractor.h"
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
@@ -63,6 +65,7 @@ Frame::Frame(const Frame &frame)
      mvScaleFactors(frame.mvScaleFactors), mvInvScaleFactors(frame.mvInvScaleFactors),
      mvLevelSigma2(frame.mvLevelSigma2), mvInvLevelSigma2(frame.mvInvLevelSigma2)
 {
+    EASY_BLOCK("Frame::Frame()", profiler::colors::Black);
     for(int i=0;i<FRAME_GRID_COLS;i++)
         for(int j=0; j<FRAME_GRID_ROWS; j++)
             mGrid[i][j]=frame.mGrid[i][j];
@@ -76,6 +79,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeSt
     :mpORBvocabulary(voc),mpORBextractorLeft(extractorLeft),mpORBextractorRight(extractorRight), mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth),
      mpReferenceKF(static_cast<KeyFrame*>(NULL))
 {
+    EASY_BLOCK("Frame::Frame()", profiler::colors::Black);
     // Frame ID
     mnId=nNextId++;
 
@@ -134,6 +138,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeSt
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
+    EASY_BLOCK("Frame::Frame()", profiler::colors::Black);
     // Frame ID
     mnId=nNextId++;
 
@@ -189,6 +194,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extra
     :mpORBvocabulary(voc),mpORBextractorLeft(extractor),mpORBextractorRight(static_cast<ORBextractor*>(NULL)),
      mTimeStamp(timeStamp), mK(K.clone()),mDistCoef(distCoef.clone()), mbf(bf), mThDepth(thDepth)
 {
+    EASY_BLOCK("Frame::Frame()", profiler::colors::Black);
     // Frame ID
     mnId=nNextId++;
 
@@ -459,6 +465,7 @@ void Frame::UndistortKeyPoints()
 
 void Frame::ComputeImageBounds(const cv::Mat &imLeft)
 {
+    EASY_BLOCK("Frame::ComputeImageBounds()", profiler::colors::Black);
     if(mDistCoef.at<float>(0)!=0.0)
     {
         cv::Mat mat(4,2,CV_32F);
@@ -489,6 +496,7 @@ void Frame::ComputeImageBounds(const cv::Mat &imLeft)
 
 void Frame::ComputeStereoMatches()
 {
+    EASY_BLOCK("Frame::ComputeStereoMatches()", profiler::colors::Black);
     mvuRight = vector<float>(N,-1.0f);
     mvDepth = vector<float>(N,-1.0f);
 
@@ -666,6 +674,7 @@ void Frame::ComputeStereoMatches()
 
 void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth)
 {
+    EASY_BLOCK("Frame::ComputeStereoFromRGBD()", profiler::colors::Black);
     mvuRight = vector<float>(N,-1);
     mvDepth = vector<float>(N,-1);
 
@@ -689,6 +698,7 @@ void Frame::ComputeStereoFromRGBD(const cv::Mat &imDepth)
 
 cv::Mat Frame::UnprojectStereo(const int &i)
 {
+    EASY_BLOCK("Frame::UnprojectStereo()", profiler::colors::Black);
     const float z = mvDepth[i];
     if(z>0)
     {

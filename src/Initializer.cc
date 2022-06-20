@@ -34,6 +34,8 @@
 
 #include <easy/profiler.h>
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
@@ -49,6 +51,7 @@ namespace ORB_SLAM2
  */
 Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iterations)
 {
+    EASY_BLOCK("Initializer::Initializer()", profiler::colors::Black);
     mK = ReferenceFrame.mK.clone();
 
     mvKeys1 = ReferenceFrame.mvKeysUn;

@@ -34,6 +34,8 @@
 #include "Thirdparty/DBoW2/DUtils/Random.h"
 #include "MapPoint.h"
 
+EASY_PROFILER_ENABLE;
+
 namespace ORB_SLAM2
 {
 
@@ -41,6 +43,7 @@ namespace ORB_SLAM2
 Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12, const bool bFixScale):
     mnIterations(0), mnBestInliers(0), mbFixScale(bFixScale)
 {
+    EASY_BLOCK("Sim3Solver::Sim3Solver", profiler::colors::Black);
     mpKF1 = pKF1;
     mpKF2 = pKF2;
 
@@ -117,6 +120,7 @@ Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> 
 
 void Sim3Solver::SetRansacParameters(double probability, int minInliers, int maxIterations)
 {
+    EASY_BLOCK("Sim3Solver::SetRansacParameters", profiler::colors::Black);
     mRansacProb = probability;
     mRansacMinInliers = minInliers;
     mRansacMaxIts = maxIterations;    
@@ -213,12 +217,14 @@ cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInli
 
 cv::Mat Sim3Solver::find(vector<bool> &vbInliers12, int &nInliers)
 {
+    EASY_BLOCK("Sim3Solver::Sim3Solver", profiler::colors::Black);
     bool bFlag;
     return iterate(mRansacMaxIts,bFlag,vbInliers12,nInliers);
 }
 
 void Sim3Solver::ComputeCentroid(cv::Mat &P, cv::Mat &Pr, cv::Mat &C)
 {
+    EASY_BLOCK("Sim3Solver::ComputeCentroid", profiler::colors::Black);
     cv::reduce(P,C,1,CV_REDUCE_SUM);
     C = C/P.cols;
 
@@ -230,6 +236,7 @@ void Sim3Solver::ComputeCentroid(cv::Mat &P, cv::Mat &Pr, cv::Mat &C)
 
 void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 {
+    EASY_BLOCK("Sim3Solver::ComputeSim3", profiler::colors::Black);
     // Custom implementation of:
     // Horn 1987, Closed-form solution of absolute orientataion using unit quaternions
 
@@ -344,6 +351,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
 void Sim3Solver::CheckInliers()
 {
+    EASY_BLOCK("Sim3Solver::CheckInliers", profiler::colors::Black);
     vector<cv::Mat> vP1im2, vP2im1;
     Project(mvX3Dc2,vP2im1,mT12i,mK1);
     Project(mvX3Dc1,vP1im2,mT21i,mK2);
@@ -371,21 +379,25 @@ void Sim3Solver::CheckInliers()
 
 cv::Mat Sim3Solver::GetEstimatedRotation()
 {
+    EASY_BLOCK("Sim3Solver::GetEstimatedRotation", profiler::colors::Black);
     return mBestRotation.clone();
 }
 
 cv::Mat Sim3Solver::GetEstimatedTranslation()
 {
+    EASY_BLOCK("Sim3Solver::GetEstimatedTranslation", profiler::colors::Black);
     return mBestTranslation.clone();
 }
 
 float Sim3Solver::GetEstimatedScale()
 {
+    EASY_BLOCK("Sim3Solver::GetEstimatedScale", profiler::colors::Black);
     return mBestScale;
 }
 
 void Sim3Solver::Project(const vector<cv::Mat> &vP3Dw, vector<cv::Mat> &vP2D, cv::Mat Tcw, cv::Mat K)
 {
+    EASY_BLOCK("Sim3Solver::Project", profiler::colors::Black);
     cv::Mat Rcw = Tcw.rowRange(0,3).colRange(0,3);
     cv::Mat tcw = Tcw.rowRange(0,3).col(3);
     const float &fx = K.at<float>(0,0);
@@ -409,6 +421,7 @@ void Sim3Solver::Project(const vector<cv::Mat> &vP3Dw, vector<cv::Mat> &vP2D, cv
 
 void Sim3Solver::FromCameraToImage(const vector<cv::Mat> &vP3Dc, vector<cv::Mat> &vP2D, cv::Mat K)
 {
+    EASY_BLOCK("Sim3Solver::FromCameraToImage", profiler::colors::Black);
     const float &fx = K.at<float>(0,0);
     const float &fy = K.at<float>(1,1);
     const float &cx = K.at<float>(0,2);

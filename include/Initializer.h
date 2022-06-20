@@ -23,6 +23,8 @@
 #include<opencv2/opencv.hpp>
 #include "Frame.h"
 
+#define USING_EASY_PROFILER
+#include "easy/profiler.h"
 
 namespace ORB_SLAM2
 {
