@@ -24,6 +24,7 @@
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 
 #include<mutex>
+#include <easy/profiler.h>
 
 using namespace std;
 
@@ -75,6 +76,7 @@ void KeyFrameDatabase::clear()
 
 vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float minScore)
 {
+    EASY_BLOCK("KeyFrameDatabase::DetectLoopCandidates()", profiler::colors::Amber300);
     set<KeyFrame*> spConnectedKeyFrames = pKF->GetConnectedKeyFrames();
     list<KeyFrame*> lKFsSharingWords;
 
@@ -198,6 +200,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
 
 vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 {
+    EASY_BLOCK("KeyFrameDatabase::DetectRelocalizationCandidates()", profiler::colors::Amber300);
     list<KeyFrame*> lKFsSharingWords;
 
     // Search all keyframes that share a word with current frame

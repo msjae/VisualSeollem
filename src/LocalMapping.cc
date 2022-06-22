@@ -26,6 +26,7 @@
 #include "Optimizer.h"
 
 #include<mutex>
+#include <easy/profiler.h>
 
 namespace ORB_SLAM2
 {
@@ -48,7 +49,7 @@ void LocalMapping::SetTracker(Tracking *pTracker)
 
 void LocalMapping::Run()
 {
-
+    EASY_BLOCK("LocalMapping::Run()", profiler::colors::Cyan400);
     mbFinished = false;
 
     while(1)
@@ -115,6 +116,7 @@ void LocalMapping::Run()
 
 void LocalMapping::InsertKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("LocalMapping::InsertKeyFrame", profiler::colors::Cyan300);
     unique_lock<mutex> lock(mMutexNewKFs);
     mlNewKeyFrames.push_back(pKF);
     mbAbortBA=true;
@@ -129,6 +131,7 @@ bool LocalMapping::CheckNewKeyFrames()
 
 void LocalMapping::ProcessNewKeyFrame()
 {
+    EASY_BLOCK("LocalMapping::ProcessNewKeyFrames()", profiler::colors::Cyan300);
     {
         unique_lock<mutex> lock(mMutexNewKFs);
         mpCurrentKeyFrame = mlNewKeyFrames.front();
@@ -171,6 +174,7 @@ void LocalMapping::ProcessNewKeyFrame()
 
 void LocalMapping::MapPointCulling()
 {
+    EASY_BLOCK("LocalMapping::MapPointCulling()", profiler::colors::Cyan300);
     // Check Recent Added MapPoints
     list<MapPoint*>::iterator lit = mlpRecentAddedMapPoints.begin();
     const unsigned long int nCurrentKFid = mpCurrentKeyFrame->mnId;
@@ -455,6 +459,7 @@ void LocalMapping::CreateNewMapPoints()
 
 void LocalMapping::SearchInNeighbors()
 {
+    EASY_BLOCK("LocalMapping::SearchInNeighbors()", profiler::colors::Cyan400);
     // Retrieve neighbor keyframes
     int nn = 10;
     if(mbMonocular)
@@ -537,6 +542,7 @@ void LocalMapping::SearchInNeighbors()
 
 cv::Mat LocalMapping::ComputeF12(KeyFrame *&pKF1, KeyFrame *&pKF2)
 {
+    EASY_BLOCK("LocalMapping::ComputeF12()", profiler::colors::Cyan400);
     cv::Mat R1w = pKF1->GetRotation();
     cv::Mat t1w = pKF1->GetTranslation();
     cv::Mat R2w = pKF2->GetRotation();
@@ -556,6 +562,7 @@ cv::Mat LocalMapping::ComputeF12(KeyFrame *&pKF1, KeyFrame *&pKF2)
 
 void LocalMapping::RequestStop()
 {
+    EASY_BLOCK("LocalMapping::RequestStop()", profiler::colors::Cyan400);
     unique_lock<mutex> lock(mMutexStop);
     mbStopRequested = true;
     unique_lock<mutex> lock2(mMutexNewKFs);
@@ -589,6 +596,7 @@ bool LocalMapping::stopRequested()
 
 void LocalMapping::Release()
 {
+    EASY_BLOCK("LocalMapping::Release()", profiler::colors::Cyan400);
     unique_lock<mutex> lock(mMutexStop);
     unique_lock<mutex> lock2(mMutexFinish);
     if(mbFinished)
@@ -610,6 +618,7 @@ bool LocalMapping::AcceptKeyFrames()
 
 void LocalMapping::SetAcceptKeyFrames(bool flag)
 {
+    EASY_BLOCK("LocalMapping::AcceptKeyFrames()", profiler::colors::Cyan400);
     unique_lock<mutex> lock(mMutexAccept);
     mbAcceptKeyFrames=flag;
 }
@@ -633,6 +642,7 @@ void LocalMapping::InterruptBA()
 
 void LocalMapping::KeyFrameCulling()
 {
+    EASY_BLOCK("LocalMapping::KeyFameCulling()", profiler::colors::Cyan400);
     // Check redundant keyframes (only local keyframes)
     // A keyframe is considered redundant if the 90% of the MapPoints it sees, are seen
     // in at least other 3 keyframes (in the same or finer scale)
@@ -726,6 +736,7 @@ void LocalMapping::RequestReset()
 
 void LocalMapping::ResetIfRequested()
 {
+    EASY_BLOCK("LocalMapping::ResetIfRequested()", profiler::colors::Cyan400);
     unique_lock<mutex> lock(mMutexReset);
     if(mbResetRequested)
     {

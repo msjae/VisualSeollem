@@ -19,7 +19,7 @@
 */
 
 #include "ORBmatcher.h"
-
+#include <easy/profiler.h>
 #include<limits.h>
 
 #include<opencv2/core/core.hpp>
@@ -158,6 +158,7 @@ bool ORBmatcher::CheckDistEpipolarLine(const cv::KeyPoint &kp1,const cv::KeyPoin
 
 int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPointMatches)
 {
+    EASY_BLOCK("ORBmatcher::SearchByBoW()", profiler::colors::Cyan700);
     const vector<MapPoint*> vpMapPointsKF = pKF->GetMapPointMatches();
 
     vpMapPointMatches = vector<MapPoint*>(F.N,static_cast<MapPoint*>(NULL));
@@ -194,7 +195,7 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
                     continue;
 
                 if(pMP->isBad())
-                    continue;                
+                    continue;
 
                 const cv::Mat &dKF= pKF->mDescriptors.row(realIdxKF);
 
@@ -289,6 +290,7 @@ int ORBmatcher::SearchByBoW(KeyFrame* pKF,Frame &F, vector<MapPoint*> &vpMapPoin
 
 int ORBmatcher::SearchByProjection(KeyFrame* pKF, cv::Mat Scw, const vector<MapPoint*> &vpPoints, vector<MapPoint*> &vpMatched, int th)
 {
+    EASY_BLOCK("ORBmatcher::SearchByProjection()", profiler::colors::Cyan700);
     // Get Calibration Parameters for later projection
     const float &fx = pKF->fx;
     const float &fy = pKF->fy;
@@ -521,6 +523,7 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2, vector<cv::Point2f
 
 int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &vpMatches12)
 {
+    EASY_BLOCK("ORBmatcher::SearchByBoW()", profiler::colors::Cyan700);
     const vector<cv::KeyPoint> &vKeysUn1 = pKF1->mvKeysUn;
     const DBoW2::FeatureVector &vFeatVec1 = pKF1->mFeatVec;
     const vector<MapPoint*> vpMapPoints1 = pKF1->GetMapPointMatches();
@@ -656,7 +659,8 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint *> &
 
 int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F12,
                                        vector<pair<size_t, size_t> > &vMatchedPairs, const bool bOnlyStereo)
-{    
+{
+    EASY_BLOCK("ORBmatcher::SearchForTriangulation()", profiler::colors::Cyan700);
     const DBoW2::FeatureVector &vFeatVec1 = pKF1->mFeatVec;
     const DBoW2::FeatureVector &vFeatVec2 = pKF2->mFeatVec;
 
@@ -695,9 +699,9 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
             for(size_t i1=0, iend1=f1it->second.size(); i1<iend1; i1++)
             {
                 const size_t idx1 = f1it->second[i1];
-                
+
                 MapPoint* pMP1 = pKF1->GetMapPoint(idx1);
-                
+
                 // If there is already a MapPoint skip
                 if(pMP1)
                     continue;
@@ -707,20 +711,20 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
                 if(bOnlyStereo)
                     if(!bStereo1)
                         continue;
-                
+
                 const cv::KeyPoint &kp1 = pKF1->mvKeysUn[idx1];
-                
+
                 const cv::Mat &d1 = pKF1->mDescriptors.row(idx1);
-                
+
                 int bestDist = TH_LOW;
                 int bestIdx2 = -1;
-                
+
                 for(size_t i2=0, iend2=f2it->second.size(); i2<iend2; i2++)
                 {
                     size_t idx2 = f2it->second[i2];
-                    
+
                     MapPoint* pMP2 = pKF2->GetMapPoint(idx2);
-                    
+
                     // If we have already matched or there is a MapPoint skip
                     if(vbMatched2[idx2] || pMP2)
                         continue;
@@ -730,11 +734,11 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
                     if(bOnlyStereo)
                         if(!bStereo2)
                             continue;
-                    
+
                     const cv::Mat &d2 = pKF2->mDescriptors.row(idx2);
-                    
+
                     const int dist = DescriptorDistance(d1,d2);
-                    
+
                     if(dist>TH_LOW || dist>bestDist)
                         continue;
 
@@ -754,7 +758,7 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
                         bestDist = dist;
                     }
                 }
-                
+
                 if(bestIdx2>=0)
                 {
                     const cv::KeyPoint &kp2 = pKF2->mvKeysUn[bestIdx2];
@@ -824,6 +828,7 @@ int ORBmatcher::SearchForTriangulation(KeyFrame *pKF1, KeyFrame *pKF2, cv::Mat F
 
 int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const float th)
 {
+    EASY_BLOCK("ORBmatcher::Fuse()", profiler::colors::Cyan700);
     cv::Mat Rcw = pKF->GetRotation();
     cv::Mat tcw = pKF->GetTranslation();
 
@@ -976,6 +981,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints, const
 
 int ORBmatcher::Fuse(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoints, float th, vector<MapPoint *> &vpReplacePoint)
 {
+    EASY_BLOCK("ORBmatcher::Fuse()", profiler::colors::Cyan700);
     // Get Calibration Parameters for later projection
     const float &fx = pKF->fx;
     const float &fy = pKF->fy;
@@ -1102,6 +1108,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, cv::Mat Scw, const vector<MapPoint *> &vpPoi
 int ORBmatcher::SearchBySim3(KeyFrame *pKF1, KeyFrame *pKF2, vector<MapPoint*> &vpMatches12,
                              const float &s12, const cv::Mat &R12, const cv::Mat &t12, const float th)
 {
+    EASY_BLOCK("ORBmatcher::SearchBySim3()", profiler::colors::Cyan700);
     const float &fx = pKF1->fx;
     const float &fy = pKF1->fy;
     const float &cx = pKF1->cx;

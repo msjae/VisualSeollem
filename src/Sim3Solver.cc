@@ -24,6 +24,7 @@
 #include <vector>
 #include <cmath>
 #include <opencv2/core/core.hpp>
+#include <easy/profiler.h>
 
 #include "KeyFrame.h"
 #include "ORBmatcher.h"
@@ -139,6 +140,7 @@ void Sim3Solver::SetRansacParameters(double probability, int minInliers, int max
 
 cv::Mat Sim3Solver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers)
 {
+    EASY_BLOCK("Sim3Solver::iterate()", profiler::colors::Amber500);
     bNoMore = false;
     vbInliers = vector<bool>(mN1,false);
     nInliers=0;
@@ -214,7 +216,7 @@ cv::Mat Sim3Solver::find(vector<bool> &vbInliers12, int &nInliers)
 
 void Sim3Solver::ComputeCentroid(cv::Mat &P, cv::Mat &Pr, cv::Mat &C)
 {
-    cv::reduce(P,C,1,CV_REDUCE_SUM);
+    cv::reduce(P,C,1, cv::REDUCE_SUM);
     C = C/P.cols;
 
     for(int i=0; i<P.cols; i++)

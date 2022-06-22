@@ -26,6 +26,7 @@
 #include "ORBmatcher.h"
 
 #include<thread>
+#include <easy/profiler.h>
 
 namespace ORB_SLAM2
 {
@@ -44,6 +45,7 @@ Initializer::Initializer(const Frame &ReferenceFrame, float sigma, int iteration
 bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatches12, cv::Mat &R21, cv::Mat &t21,
                              vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated)
 {
+    EASY_BLOCK("Initalizer::Intialze()", profiler::colors::Cyan100);
     // Fill structures with current keypoints and matches with reference frame
     // Reference Frame: 1, Current Frame: 2
     mvKeys2 = CurrentFrame.mvKeysUn;
@@ -123,6 +125,7 @@ bool Initializer::Initialize(const Frame &CurrentFrame, const vector<int> &vMatc
 
 void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, cv::Mat &H21)
 {
+    EASY_BLOCK("Initializer::FindHomography()", profiler::colors::Cyan100);
     // Number of putative matches
     const int N = mvMatches12.size();
 
@@ -174,6 +177,7 @@ void Initializer::FindHomography(vector<bool> &vbMatchesInliers, float &score, c
 
 void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, cv::Mat &F21)
 {
+    EASY_BLOCK("Initializer::FindFundamental()", profiler::colors::Cyan100);
     // Number of putative matches
     const int N = vbMatchesInliers.size();
 
@@ -225,6 +229,7 @@ void Initializer::FindFundamental(vector<bool> &vbMatchesInliers, float &score, 
 
 cv::Mat Initializer::ComputeH21(const vector<cv::Point2f> &vP1, const vector<cv::Point2f> &vP2)
 {
+    EASY_BLOCK("Initializer::ComputeH21", profiler::colors::Cyan100);
     const int N = vP1.size();
 
     cv::Mat A(2*N,9,CV_32F);
@@ -267,6 +272,7 @@ cv::Mat Initializer::ComputeH21(const vector<cv::Point2f> &vP1, const vector<cv:
 
 cv::Mat Initializer::ComputeF21(const vector<cv::Point2f> &vP1,const vector<cv::Point2f> &vP2)
 {
+    EASY_BLOCK("ComputeF21", profiler::colors::Cyan100);
     const int N = vP1.size();
 
     cv::Mat A(N,9,CV_32F);
@@ -303,7 +309,8 @@ cv::Mat Initializer::ComputeF21(const vector<cv::Point2f> &vP1,const vector<cv::
 }
 
 float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, vector<bool> &vbMatchesInliers, float sigma)
-{   
+{
+    EASY_BLOCK("CheckHomography()", profiler::colors::Cyan100);
     const int N = mvMatches12.size();
 
     const float h11 = H21.at<float>(0,0);
@@ -389,6 +396,7 @@ float Initializer::CheckHomography(const cv::Mat &H21, const cv::Mat &H12, vecto
 
 float Initializer::CheckFundamental(const cv::Mat &F21, vector<bool> &vbMatchesInliers, float sigma)
 {
+    EASY_BLOCK("Initializer::CheckFundamental()", profiler::colors::Cyan100);
     const int N = mvMatches12.size();
 
     const float f11 = F21.at<float>(0,0);
@@ -470,6 +478,7 @@ float Initializer::CheckFundamental(const cv::Mat &F21, vector<bool> &vbMatchesI
 bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv::Mat &K,
                             cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    EASY_BLOCK("Initializer::ReconstructF", profiler::colors::Cyan100);
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -572,6 +581,7 @@ bool Initializer::ReconstructF(vector<bool> &vbMatchesInliers, cv::Mat &F21, cv:
 bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv::Mat &K,
                       cv::Mat &R21, cv::Mat &t21, vector<cv::Point3f> &vP3D, vector<bool> &vbTriangulated, float minParallax, int minTriangulated)
 {
+    EASY_BLOCK("Initializer::ReconstructH", profiler::colors::Cyan100);
     int N=0;
     for(size_t i=0, iend = vbMatchesInliers.size() ; i<iend; i++)
         if(vbMatchesInliers[i])
@@ -733,6 +743,7 @@ bool Initializer::ReconstructH(vector<bool> &vbMatchesInliers, cv::Mat &H21, cv:
 
 void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const cv::Mat &P1, const cv::Mat &P2, cv::Mat &x3D)
 {
+    EASY_BLOCK("Initializer::Triangulate", profiler::colors::Cyan100);
     cv::Mat A(4,4,CV_32F);
 
     A.row(0) = kp1.pt.x*P1.row(2)-P1.row(0);
@@ -748,6 +759,7 @@ void Initializer::Triangulate(const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, 
 
 void Initializer::Normalize(const vector<cv::KeyPoint> &vKeys, vector<cv::Point2f> &vNormalizedPoints, cv::Mat &T)
 {
+    EASY_BLOCK("Initializer::Normalized", profiler::colors::Cyan100);
     float meanX = 0;
     float meanY = 0;
     const int N = vKeys.size();
@@ -799,6 +811,7 @@ int Initializer::CheckRT(const cv::Mat &R, const cv::Mat &t, const vector<cv::Ke
                        const vector<Match> &vMatches12, vector<bool> &vbMatchesInliers,
                        const cv::Mat &K, vector<cv::Point3f> &vP3D, float th2, vector<bool> &vbGood, float &parallax)
 {
+    EASY_BLOCK("Initializer::CheckRT", profiler::colors::Cyan100);
     // Calibration parameters
     const float fx = K.at<float>(0,0);
     const float fy = K.at<float>(1,1);
@@ -908,6 +921,7 @@ int Initializer::CheckRT(const cv::Mat &R, const cv::Mat &t, const vector<cv::Ke
 
 void Initializer::DecomposeE(const cv::Mat &E, cv::Mat &R1, cv::Mat &R2, cv::Mat &t)
 {
+    EASY_BLOCK("Initializer::DecomposeE", profiler::colors::Cyan100);
     cv::Mat u,w,vt;
     cv::SVD::compute(E,w,u,vt);
 

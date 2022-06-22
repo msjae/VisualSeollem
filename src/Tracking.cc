@@ -37,6 +37,7 @@
 #include "PnPsolver.h"
 
 #include <Utils.hpp>
+#include <easy/profiler.h>
 
 using namespace std;
 
@@ -166,6 +167,7 @@ void Tracking::SetViewer(Viewer *pViewer)
 
 cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRectRight, const double &timestamp)
 {
+    EASY_BLOCK("Tracking::GrabImageStereo()", profiler::colors::Cyan200);
     mImGray = imRectLeft;
     cv::Mat imGrayRight = imRectRight;
 
@@ -238,6 +240,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
 
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 {
+    EASY_BLOCK("Tracking::GrabImageMonocular()", profiler::colors::Cyan200);
     mImGray = im;
 
     if(mImGray.channels()==3)
@@ -267,6 +270,7 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 
 void Tracking::Track()
 {
+    EASY_BLOCK("Tracking::Track()", profiler::colors::Cyan200);
     PUSH_RANGE("Tracking::Track()", 2);
     if(mState==NO_IMAGES_YET)
     {
@@ -565,12 +569,13 @@ void Tracking::StereoInitialization()
 
 void Tracking::MonocularInitialization()
 {
-
+    EASY_FUNCTION(profiler::colors::Magenta);
     if(!mpInitializer)
     {
         // Set Reference Frame
         if(mCurrentFrame.mvKeys.size()>100)
         {
+            EASY_BLOCK("MonocularInitialization block(not Initialized)", profiler::colors::Magenta);
             mInitialFrame = Frame(mCurrentFrame);
             mLastFrame = Frame(mCurrentFrame);
             mvbPrevMatched.resize(mCurrentFrame.mvKeysUn.size());
@@ -586,9 +591,11 @@ void Tracking::MonocularInitialization()
 
             return;
         }
+        EASY_END_BLOCK;
     }
     else
     {
+        EASY_BLOCK("MonocularInitialization block(Initialized)", profiler::colors::CyanA700);
         // Try to initialize
         if((int)mCurrentFrame.mvKeys.size()<=100)
         {
@@ -631,14 +638,17 @@ void Tracking::MonocularInitialization()
             Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
             tcw.copyTo(Tcw.rowRange(0,3).col(3));
             mCurrentFrame.SetPose(Tcw);
+            EASY_END_BLOCK
 
             CreateInitialMapMonocular();
         }
+        EASY_END_BLOCK
     }
 }
 
 void Tracking::CreateInitialMapMonocular()
 {
+    EASY_BLOCK("CreateInitialMapMonocular() block", profiler::colors::Amber100);
     // Create KeyFrames
     KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpMap,mpKeyFrameDB);
     KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
@@ -759,6 +769,7 @@ void Tracking::CheckReplacedInLastFrame()
 
 bool Tracking::TrackReferenceKeyFrame()
 {
+    EASY_BLOCK("Tracking::TrackingReferenceKeyFrame()", profiler::colors::Cyan200);
     // Compute Bag of Words vector
     mCurrentFrame.ComputeBoW();
 
@@ -803,6 +814,7 @@ bool Tracking::TrackReferenceKeyFrame()
 
 void Tracking::UpdateLastFrame()
 {
+    EASY_BLOCK("Tracking::UpdateLastFrame()", profiler::colors::Cyan200);
     // Update pose according to reference keyframe
     KeyFrame* pRef = mLastFrame.mpReferenceKF;
     cv::Mat Tlr = mlRelativeFramePoses.back();
@@ -869,6 +881,7 @@ void Tracking::UpdateLastFrame()
 
 bool Tracking::TrackWithMotionModel()
 {
+    EASY_BLOCK("Tracking::TrackingWithMotionModel()", profiler::colors::Cyan200);
     ORBmatcher matcher(0.9,true);
 
     // Update last frame pose according to its reference keyframe
@@ -932,6 +945,7 @@ bool Tracking::TrackWithMotionModel()
 
 bool Tracking::TrackLocalMap()
 {
+    EASY_BLOCK("Tracking::TrackLocalMap()", profiler::colors::Cyan200);
     // We have an estimation of the camera pose and some map points tracked in the frame.
     // We retrieve the local map and try to find matches to points in the local map.
 
@@ -979,6 +993,7 @@ bool Tracking::TrackLocalMap()
 
 bool Tracking::NeedNewKeyFrame()
 {
+    EASY_BLOCK("NeedNewKeyFrame()", profiler::colors::Cyan200);
     if(mbOnlyTracking)
         return false;
 
@@ -1078,6 +1093,7 @@ bool Tracking::NeedNewKeyFrame()
 
 void Tracking::CreateNewKeyFrame()
 {
+    EASY_BLOCK("Tracking::CreateNewKeyFrame()", profiler::colors::Cyan200);
     if(!mpLocalMapper->SetNotStop(true))
         return;
 
@@ -1158,6 +1174,7 @@ void Tracking::CreateNewKeyFrame()
 
 void Tracking::SearchLocalPoints()
 {
+    EASY_BLOCK("Tracking::SearchLocalPoints()", profiler::colors::Cyan200);
     // Do not search map points already matched
     for(vector<MapPoint*>::iterator vit=mCurrentFrame.mvpMapPoints.begin(), vend=mCurrentFrame.mvpMapPoints.end(); vit!=vend; vit++)
     {
@@ -1210,6 +1227,7 @@ void Tracking::SearchLocalPoints()
 
 void Tracking::UpdateLocalMap()
 {
+    EASY_BLOCK("Tracking::UpdateLocalMap()", profiler::colors::Cyan200);
     // This is for visualization
     mpMap->SetReferenceMapPoints(mvpLocalMapPoints);
 
@@ -1220,6 +1238,7 @@ void Tracking::UpdateLocalMap()
 
 void Tracking::UpdateLocalPoints()
 {
+    EASY_BLOCK("Tracking::UpdateLocalPoints()", profiler::colors::Cyan200);
     mvpLocalMapPoints.clear();
 
     for(vector<KeyFrame*>::const_iterator itKF=mvpLocalKeyFrames.begin(), itEndKF=mvpLocalKeyFrames.end(); itKF!=itEndKF; itKF++)
@@ -1246,6 +1265,7 @@ void Tracking::UpdateLocalPoints()
 
 void Tracking::UpdateLocalKeyFrames()
 {
+    EASY_BLOCK("Tracking::UpdateLocalKeyFrames()", profiler::colors::Cyan200);
     // Each map point vote for the keyframes in which it has been observed
     map<KeyFrame*,int> keyframeCounter;
     for(int i=0; i<mCurrentFrame.N; i++)
@@ -1356,6 +1376,7 @@ void Tracking::UpdateLocalKeyFrames()
 
 bool Tracking::Relocalization()
 {
+    EASY_BLOCK("Tracking::Relocalization()", profiler::colors::Cyan200);
     // Compute Bag of Words Vector
     mCurrentFrame.ComputeBoW();
 
@@ -1519,6 +1540,7 @@ bool Tracking::Relocalization()
 
 void Tracking::Reset()
 {
+    EASY_BLOCK("Tracking::Reset()", profiler::colors::Cyan200);
     if (mpViewer != NULL)
     {
         mpViewer->RequestStop();

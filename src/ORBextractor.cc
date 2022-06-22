@@ -68,6 +68,8 @@
 #include <cuda/Orb.hpp>
 #include <Utils.hpp>
 
+#include <easy/profiler.h>
+
 using namespace cv;
 using namespace std;
 
@@ -465,7 +467,8 @@ void ExtractorNode::DivideNode(ExtractorNode &n1, ExtractorNode &n2, ExtractorNo
 vector<KeyPoint> ORBextractor::DistributeOctTree(const vector<KeyPoint>& vToDistributeKeys, const int minX,
                                        const int maxX, const int minY, const int maxY, const int N, const int level)
 {
-    // Compute how many initial nodes   
+    EASY_BLOCK("ORBextractor::DistributeOctTree()", profiler::colors::Amber200);
+    // Compute how many initial nodes
     const int nIni = round(static_cast<float>(maxX-minX)/(maxY-minY));
 
     const float hX = static_cast<float>(maxX-minX)/nIni;
@@ -745,7 +748,8 @@ void ORBextractor::ComputeKeyPointsOctTree(vector<vector<KeyPoint>>& allKeypoint
 
 void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPoint>& _keypoints,
                       OutputArray _descriptors)
-{ 
+{
+    EASY_BLOCK("ORBextractor::operator()", profiler::colors::Amber200);
     PUSH_RANGE("ORBextractor", 0);
     if(_image.empty())
         return;
@@ -819,6 +823,7 @@ void ORBextractor::operator()( InputArray _image, InputArray _mask, vector<KeyPo
 }
 
 void ORBextractor::ComputePyramid(Mat image) {
+    EASY_BLOCK("ORBextractor::ComputePyramid()", profiler::colors::Amber200);
   if (mvImagePyramidAllocatedFlag == false) {
     // first frame, allocate the Pyramids
     for (int level = 0; level < nlevels; ++level) {

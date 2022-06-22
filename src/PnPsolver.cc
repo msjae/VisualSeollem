@@ -52,11 +52,13 @@
 
 #include "PnPsolver.h"
 
+#include <easy/profiler.h>
 #include <vector>
 #include <cmath>
 #include <opencv2/core/core.hpp>
 #include "Thirdparty/DBoW2/DUtils/Random.h"
 #include <algorithm>
+#include <easy/profiler.h>
 
 using namespace std;
 
@@ -164,6 +166,7 @@ cv::Mat PnPsolver::find(vector<bool> &vbInliers, int &nInliers)
 
 cv::Mat PnPsolver::iterate(int nIterations, bool &bNoMore, vector<bool> &vbInliers, int &nInliers)
 {
+    EASY_BLOCK("PnPSolver::iterate()", profiler::colors::Amber400);
     bNoMore = false;
     vbInliers.clear();
     nInliers=0;

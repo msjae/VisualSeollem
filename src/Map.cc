@@ -21,6 +21,7 @@
 #include "Map.h"
 
 #include<mutex>
+#include <easy/profiler.h>
 
 namespace ORB_SLAM2
 {
@@ -31,6 +32,7 @@ Map::Map():mnMaxKFid(0)
 
 void Map::AddKeyFrame(KeyFrame *pKF)
 {
+    EASY_BLOCK("Map::AddKeyFrame()", profiler::colors::Cyan600);
     unique_lock<mutex> lock(mMutexMap);
     mspKeyFrames.insert(pKF);
     if(pKF->mnId>mnMaxKFid)

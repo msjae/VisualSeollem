@@ -1,3 +1,7 @@
+CMakeLists.txt.user
+KITTI
+*~
+lib/
 *.swp
 build/
 log/
@@ -8,6 +12,7 @@ Examples/Stereo/stereo_kitti
 Thirdparty/DBoW2/build/
 Thirdparty/g2o/build/
 Thirdparty/g2o/config.h
+Thirdparty/cuda-samples
 Vocabulary/ORBvoc.txt
 KeyFrameTrajectory.txt
 CameraTrajectory.txt
@@ -41,3 +46,6 @@ CameraTrajectory.txt
 *.exe
 *.out
 *.app
+
+.idea
+compile_commands.json 
