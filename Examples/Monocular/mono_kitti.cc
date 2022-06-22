@@ -125,6 +125,9 @@ int main(int argc, char **argv)
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
 
+    // Save profiler as a file
+    profiler::dumpBlocksToFile("/home/junbug331/workspace/slam-study/ORB_SLAM2_CUDA/ORB_SLAM2_CUDA_seq00.prof");
+
     return 0;
 }
 
