@@ -11,6 +11,11 @@ on:
     # * * * * *  command to execute / Datetime is UTC-0 / KST 02:00 AM
     - cron: "0 17 * * *"
   workflow_dispatch:
+  push:
+    branches: [ "profiler_each_function" ]
+  pull_request:
+    branches: [ "profiler_each_function" ]
+
 
 jobs:
   Dependency_Build:
