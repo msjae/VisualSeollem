@@ -2,7 +2,7 @@ FROM ubuntu:focal
 
 MAINTAINER changh95
 ARG DEBIAN_FRONTEND=noninteractive
-
+RUN apt-get install -y apt-utils
 RUN apt-get update -y && apt-get upgrade -y
 
 RUN apt-get install build-essential -y && \
