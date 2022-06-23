@@ -26,6 +26,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/Pangolin
       run: |
+        sudo apt-get install libeigen3-dev
         cd ${{ github.workspace }}/Thirdparty/Pangolin
         mkdir build
         cd build
