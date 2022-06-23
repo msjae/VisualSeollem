@@ -14,8 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Configuring and building libglew-dev, libuvc
-      run: sudo apt-get install libglew-dev
-	git clone http://github.com/ktossell/libuvc
+      run: |
+      	sudo apt-get install libglew-dev
+      	git clone http://github.com/ktossell/libuvc
 	cd libuvc
 	mkdir build
 	cd build
@@ -23,21 +24,24 @@ jobs:
 	make && sudo make install
 
     - name: Configuring and building Thirdparty/DBoW2
-      run: cd ../../Thirdparty/DBoW2
+      run: |
+      	cd ../../Thirdparty/DBoW2
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release
 	make -j
 
     - name: Configuring and building Thirdparty/g2o
-      run: cd ../../g2o
+      run: |
+      	cd ../../g2o
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release
 	make -j$nproc
 
     - name: Configuring and building Thirdparty/Pangolin
-      run: cd ../../Pangolin
+      run: |
+      	cd ../../Pangolin
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -46,7 +50,8 @@ jobs:
 
 
     - name: Configuring and building Thirdparty/easy_profiler
-      run: cd ../../easy_profiler
+      run: |
+      	cd ../../easy_profiler
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -54,7 +59,8 @@ jobs:
 	sudo make install
 
     - name: Configuring and building Thirdparty/opencv
-      run: cd ../../opencv
+      run: |
+      	cd ../../opencv
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release \
@@ -68,12 +74,14 @@ jobs:
 	sudo make install
 
     - name: Uncompress vocabulary
-      run: cd ../../../
+      run: |
+      	cd ../../../
 	cd Vocabulary
 	tar -xf ORBvoc.txt.tar.gz
 
     - name: Configuring and building ORB_SLAM2
-      run: cd ..
+      run: |
+      	cd ..
 	mkdir build
 	cd build
 	cmake .. -DCMAKE_BUILD_TYPE=Release
