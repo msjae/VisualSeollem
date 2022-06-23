@@ -1,12 +1,7 @@
 name: CI
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - development
-  pull_request:
-    branches: [ development ]
+
 env:
   GET_REPO: export REPO=${GITHUB_REPOSITORY#*/}
   GET_HASH: export HASH=${GITHUB_SHA}
