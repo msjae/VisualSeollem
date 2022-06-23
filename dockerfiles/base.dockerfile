@@ -2,10 +2,8 @@ FROM ubuntu:focal
 
 MAINTAINER changh95
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y apt-utils
-RUN apt-get update -y && apt-get upgrade -y
-
-RUN apt-get install build-essential -y && \
+RUN apt-get update -y && apt-get upgrade -y && \
+apt-get install build-essential -y && \
 # Related to build...
 apt-get install cmake -y && \
 apt-get install git -y && \
@@ -33,8 +31,7 @@ apt-get install -y x11-utils && \
 apt-get install -y x11-apps && \
 apt-get clean
 
-RUN pip3 install pyyaml
-RUN pip3 install gitpython
+RUN pip3 install pyyaml && pip3 install gitpython
 
 RUN apt-get autoclean
 
