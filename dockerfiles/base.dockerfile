@@ -39,6 +39,6 @@ RUN pip3 install gitpython
 RUN apt-get autoclean
 
 RUN mkdir slam && cd slam && \
-    git clone https://github.com/idra79haza/VisualSeollem.git &&\
+    git clone https://github.com/msjae/VisualSeollem.git &&\
     cd VisualSeollem && ./buildDeps.py --d --system
 
