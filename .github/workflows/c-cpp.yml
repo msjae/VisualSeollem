@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Configuring and building libglew-dev, libuvc
       run: |
-       pwd
+       sudo apt-get install libusb-1.0-0-dev
        git clone http://github.com/ktossell/libuvc
        cd libuvc
        mkdir build
