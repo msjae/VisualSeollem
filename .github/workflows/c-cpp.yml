@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Configuring and building libglew-dev, libuvc
       run: |
-       git clone http://github.com/ktossell/libuvc &&
+       git clone http://github.com/ktossell/libuvc
        cd libuvc
        mkdir build
        cd build
