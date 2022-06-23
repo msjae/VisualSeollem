@@ -30,7 +30,7 @@ jobs:
           echo "=== Build start ==="
           cd ${{ github.workspace }}/dockerfiles
           echo "=== Log Docker image status ==="
-
+          echo minn2263 | sudo -S echo ""
           sudo docker images 
           echo "=== Temporary Docker image build start ==="              
           sudo docker build --force-rm --no-cache -t slam:base_temp . -f base.dockerfile
