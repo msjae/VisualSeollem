@@ -28,8 +28,8 @@ jobs:
       - name: pre-build 3rdParty libs 
         run: |
           echo "=== Build start ==="
-          echo minn2263 | sudo -S echo ""         
-          cd dockerfiles
+   
+          cd ${{ github.workspace }}/dockerfiles
           echo "=== Log Docker image status ==="
           sudo docker images 
           echo "=== Temporary Docker image build start ==="              
