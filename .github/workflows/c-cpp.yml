@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "profiler_each_function" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "profiler_each_function" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
         openexr   \
         libtbb2 libtbb-dev libdc1394-22-dev
 
-    - name: Configuring and building Thirdparty/Pangolin
+    - name: Configuring and building Thirdparty/Pangolin-0.5
       run: |
         sudo apt-get install libeigen3-dev
         cd ${{ github.workspace }}/Thirdparty/Pangolin-0.5
