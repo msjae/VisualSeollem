@@ -25,7 +25,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/DBoW2
       run: |
-        cd ../../Thirdparty/DBoW2
+        cd ${{ github.workspace }}/VisualSeollem/VisualSeollem/Thirdparty/DBoW2
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
