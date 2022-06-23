@@ -11,10 +11,6 @@ on:
     # * * * * *  command to execute / Datetime is UTC-0 / KST 02:00 AM
     - cron: "0 17 * * *"
   workflow_dispatch:
-  push:
-    branches: [ "profiler_each_function" ]
-  pull_request:
-    branches: [ "profiler_each_function" ]
 
 
 jobs:
@@ -30,8 +26,7 @@ jobs:
           echo "=== Build start ==="
           cd ${{ github.workspace }}/dockerfiles
           echo "=== Log Docker image status ==="
-          echo minn2263 | sudo -S echo ""
-          sudo docker images 
+          echo minn2263 | sudo -S echo "" 
           echo "=== Temporary Docker image build start ==="              
           sudo docker build --force-rm --no-cache -t slam:base_temp . -f base.dockerfile
           echo "=== Temporary Docker image build finished ==="
