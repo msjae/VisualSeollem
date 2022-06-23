@@ -13,5 +13,68 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: build
-      run: sh build.sh
+    - name: Configuring and building libglew-dev, libuvc
+      run: sudo apt-get install libglew-dev
+	git clone http://github.com/ktossell/libuvc
+	cd libuvc
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make && sudo make install
+
+    - name: Configuring and building Thirdparty/DBoW2
+      run: cd ../../Thirdparty/DBoW2
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make -j
+
+    - name: Configuring and building Thirdparty/g2o
+      run: cd ../../g2o
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make -j$nproc
+
+    - name: Configuring and building Thirdparty/Pangolin
+      run: cd ../../Pangolin
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make -j$nproc
+	sudo make install
+
+
+    - name: Configuring and building Thirdparty/easy_profiler
+      run: cd ../../easy_profiler
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make -j$nproc
+	sudo make install
+
+    - name: Configuring and building Thirdparty/opencv
+      run: cd ../../opencv
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release \
+	    -D CMAKE_INSTALL_PREFIX=/usr/local \
+	    -D INSTALL_C_EXAMPLES=ON \
+	    -D INSTALL_PYTHON_EXAMPLES=ON \
+	    -D OPENCV_GENERATE_PKGCONFIG=ON \
+	    -D OPENCV_EXTRA_MODULES_PATH=~/opencv_build/opencv_contrib/modules \
+	    -D BUILD_EXAMPLES=ON ..
+	make -j$nproc
+	sudo make install
+
+    - name: Uncompress vocabulary
+      run: cd ../../../
+	cd Vocabulary
+	tar -xf ORBvoc.txt.tar.gz
+
+    - name: Configuring and building ORB_SLAM2
+      run: cd ..
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	make -j$nproc
