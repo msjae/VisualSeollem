@@ -15,6 +15,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
 
 cd ../../g2o
 
@@ -24,6 +25,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
 
 cd ../../Pangolin
 
@@ -33,6 +35,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
 
 cd ../../easy_profiler
 
@@ -42,6 +45,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
 
 cd ../../opencv
 
@@ -51,6 +55,7 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
 
 cd ../../../
 
@@ -67,3 +72,4 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
+sudo make install
