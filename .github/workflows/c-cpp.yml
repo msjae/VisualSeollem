@@ -22,22 +22,7 @@ jobs:
        cd build
        cmake .. -DCMAKE_BUILD_TYPE=Release
        make && sudo make install
-
-    - name: Configuring and building Thirdparty/DBoW2
-      run: |
-        cd ${{ github.workspace }}/Thirdparty/DBoW2
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        make -j
-
-    - name: Configuring and building Thirdparty/g2o
-      run: |
-        cd ${{ github.workspace }}/Thirdparty/g2o
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
-        make -j$nproc
+       
 
     - name: Configuring and building Thirdparty/Pangolin
       run: |
@@ -58,6 +43,7 @@ jobs:
         make -j$nproc
         sudo make install
 
+
     - name: Configuring and building Thirdparty/opencv
       run: |
         cd ${{ github.workspace }}/Thirdparty/opencv
@@ -73,11 +59,30 @@ jobs:
         make -j$nproc
         sudo make install
 
+
+    - name: Configuring and building Thirdparty/DBoW2
+      run: |
+        cd ${{ github.workspace }}/Thirdparty/DBoW2
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j
+
+    - name: Configuring and building Thirdparty/g2o
+      run: |
+        cd ${{ github.workspace }}/Thirdparty/g2o
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$nproc
+        
+        
     - name: Uncompress vocabulary
       run: |
         cd ${{ github.workspace }}
         cd Vocabulary
         tar -xf ORBvoc.txt.tar.gz
+
 
     - name: Configuring and building ORB_SLAM2
       run: |
