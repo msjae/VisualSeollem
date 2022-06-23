@@ -24,6 +24,22 @@ jobs:
        make && sudo make install
        
 
+    - name: Configuring and building Thirdparty/opencv
+      run: |
+        cd ${{ github.workspace }}/Thirdparty/opencv
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D INSTALL_C_EXAMPLES=ON \
+        -D INSTALL_PYTHON_EXAMPLES=ON \
+        -D OPENCV_GENERATE_PKGCONFIG=ON \
+        -D OPENCV_EXTRA_MODULES_PATH=~/opencv_build/opencv_contrib/modules \
+        -D WITH_OPENGL=ON \
+        -D WITH_GRK=ON \
+        -D BUILD_EXAMPLES=ON ..
+        make -j$nproc
+        sudo make install
     - name: Configuring and building Thirdparty/Pangolin
       run: |
         sudo apt-get install libeigen3-dev
@@ -41,22 +57,6 @@ jobs:
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
-        make -j$nproc
-        sudo make install
-
-
-    - name: Configuring and building Thirdparty/opencv
-      run: |
-        cd ${{ github.workspace }}/Thirdparty/opencv
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D INSTALL_C_EXAMPLES=ON \
-        -D INSTALL_PYTHON_EXAMPLES=ON \
-        -D OPENCV_GENERATE_PKGCONFIG=ON \
-        -D OPENCV_EXTRA_MODULES_PATH=~/opencv_build/opencv_contrib/modules \
-        -D BUILD_EXAMPLES=ON ..
         make -j$nproc
         sudo make install
 
