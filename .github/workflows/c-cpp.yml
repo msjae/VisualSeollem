@@ -45,6 +45,7 @@ jobs:
         sudo apt install -y mesa-utils libgl1-mesa-dri libgtkgl2.0-dev libgtkglext1-dev
         sudo apt install -y libatlas-base-dev gfortran libeigen3-dev
         sudo apt install -y python3-dev python3-numpy
+        sudo apt install libglew-dev
         sudo apt install git \
         libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev \
         openexr   \
