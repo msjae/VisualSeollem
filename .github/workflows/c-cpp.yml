@@ -25,7 +25,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/DBoW2
       run: |
-        cd ${{ github.workspace }}/VisualSeollem/VisualSeollem/Thirdparty/DBoW2
+        cd ${{ github.workspace }}/Thirdparty/DBoW2
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -33,7 +33,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/g2o
       run: |
-        cd ../../g2o
+        cd ${{ github.workspace }}/Thirdparty/g2o
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -41,7 +41,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/Pangolin
       run: |
-        cd ../../Pangolin
+        cd ${{ github.workspace }}/Thirdparty/Pangolin
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -51,7 +51,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/easy_profiler
       run: |
-        cd ../../easy_profiler
+        cd ${{ github.workspace }}/Thirdparty/easy_profiler
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -60,7 +60,7 @@ jobs:
 
     - name: Configuring and building Thirdparty/opencv
       run: |
-        cd ../../opencv
+        cd ${{ github.workspace }}/Thirdparty/opencv
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release \
@@ -75,13 +75,13 @@ jobs:
 
     - name: Uncompress vocabulary
       run: |
-        cd ../../../
+        cd ${{ github.workspace }}
         cd Vocabulary
         tar -xf ORBvoc.txt.tar.gz
 
     - name: Configuring and building ORB_SLAM2
       run: |
-        cd ..
+        cd ${{ github.workspace }}
         mkdir build
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
