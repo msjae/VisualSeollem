@@ -39,7 +39,6 @@ endif()
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(easy_profiler REQUIRED)
-find_package(spdlog REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}

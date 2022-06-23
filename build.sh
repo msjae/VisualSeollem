@@ -1,6 +1,16 @@
+echo "Configuring and building libglew-dev, libuvc ..."
+
+sudo apt-get install libglew-dev
+git clone http://github.com/ktossell/libuvc
+cd libuvc
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make && sudo make install
+
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
-cd Thirdparty/DBoW2
+cd ../../Thirdparty/DBoW2
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -15,7 +25,35 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
 
+cd ../../Pangolin
+
+echo "Configuring and building Thirdparty/Pangolin ..."
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+
+cd ../../easy_profiler
+
+echo "Configuring and building Thirdparty/easy_profiler ..."
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+
+cd ../../opencv
+
+echo "Configuring and building Thirdparty/opencv ..."
+
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
+
 cd ../../../
+
 
 echo "Uncompress vocabulary ..."
 
