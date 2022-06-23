@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "profiler_each_function" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "profiler_each_function" ]
 
 jobs:
   build:
