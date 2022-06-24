@@ -18,11 +18,7 @@ jobs:
           cd dockerfiles
           echo "=== Log Docker image status ==="
           sudo docker images 
-
-      - name: build slam:base
-        run: |
-          echo "=== Temporary Docker image build start ==="
-          echo minn2263 | sudo -S echo ""              
+          echo "=== Temporary Docker image build start ==="          
           sudo docker build --force-rm --no-cache -t slam:base . -f base.dockerfile
           echo "=== Temporary Docker image build finished ==="
           echo "=== Log Docker image status ==="
