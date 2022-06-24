@@ -9,11 +9,6 @@ RUN useradd -m user && yes password | passwd user
 
 RUN echo "== Start Debug build == " && \
 cd /slam/VisualSeollem && \
-git remote update && \
-git fetch --all && \
-git checkout main && \
-git pull && \
-git branch && \
 sh build.sh
 
 RUN echo "== KITTI Examples == " && \
