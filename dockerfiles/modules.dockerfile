@@ -18,7 +18,7 @@ mkdir build_debug && cd build_debug && \
 cmake -DCMAKE_BUILD_TYPE=Debug -GNinja .. && ninja
 
 RUN echo "== Start Release build == " && \
-cd programmers_slam_project_template && \
+cd VisualSeollem && \
 git remote update && \
 git fetch --all && \
 git checkout main && \
