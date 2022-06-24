@@ -16,7 +16,10 @@ jobs:
           echo "=== Build start ==="
           echo minn2263 | sudo -S echo ""         
           cd dockerfiles     
-          sudo docker start orbslam2
+          sudo docker start orbslam22
+          sudo docker attach orbslam22
+          cd /root/ORB_SLAM2
+          ls
           echo "=== Job finished ===" 
 
       - name: Clean up Docker image if build fails
