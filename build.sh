@@ -8,6 +8,9 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make && sudo make install
 
+cd ../../
+python3 buildDeps.py
+
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
 cd ../../Thirdparty/DBoW2
@@ -38,23 +41,8 @@ make -j$nproc
 sudo make install
 
 
-
-echo "Configuring and building Thirdparty/easy_profiler ..."
-cd ../../easy_profiler
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$nproc
-sudo make install
-
-
-
-
-
-
-
 echo "Uncompress vocabulary ..."
-cd ../../../
+cd ../../
 cd Vocabulary
 tar -xf ORBvoc.txt.tar.gz
 
