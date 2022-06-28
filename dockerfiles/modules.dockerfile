@@ -3,26 +3,14 @@ FROM slam:base
 ARG BRANCH=development
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update -y && apt-get upgrade -y
-
 RUN useradd -m user && yes password | passwd user
+RUN apt-get update -y && apt-get upgrade -y && apt-get install libusb-1.0-0-dev && apt install libspdlog-dev
 
-RUN echo "== Start Debug build == " && \
-cd VisualSeollem && \
+RUN echo "== Start build == " && \
+cd /slam/VisualSeollem && \
 git remote update && \
 git fetch --all && \
-git checkout main && \
+git checkout ci && \
 git pull && \
 git branch && \
-mkdir build_debug && cd build_debug && \
-cmake -DCMAKE_BUILD_TYPE=Debug -GNinja .. && ninja
-
-RUN echo "== Start Release build == " && \
-cd VisualSeollem && \
-git remote update && \
-git fetch --all && \
-git checkout main && \
-git pull && \
-git branch && \
-mkdir build_release && cd build_release && \
-cmake -DCMAKE_BUILD_TYPE=Release -GNinja .. && ninja
+sh build.sh

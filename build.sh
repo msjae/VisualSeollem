@@ -8,8 +8,6 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make && sudo make install
 
-cd ../../
-python3 buildDeps.py
 
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
@@ -18,7 +16,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j
-sudo make install
 
 
 
@@ -28,17 +25,6 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$nproc
-sudo make install
-
-
-
-echo "Configuring and building Thirdparty/Pangolin ..."
-cd ../../Pangolin
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$nproc
-sudo make install
 
 
 echo "Uncompress vocabulary ..."
@@ -53,4 +39,3 @@ mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$nproc
-sudo make install
